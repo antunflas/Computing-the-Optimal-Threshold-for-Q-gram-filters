@@ -1,7 +1,5 @@
 
-# Created by https://www.gitignore.io/api/cli,eclipse,visualstudio
-
-#!! ERROR: cli is undefined. Use list command to see defined gitignore types !!#
+# Created by https://www.gitignore.io/api/eclipse,windows,linux,visualstudio,c++
 
 ### Eclipse ###
 *.pydevproject
@@ -45,6 +43,40 @@ local.properties
 
 # STS (Spring Tool Suite)
 .springBeans
+
+
+### Windows ###
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+
+### Linux ###
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
 
 
 ### VisualStudio ###
@@ -282,4 +314,35 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+
+
+### C++ ###
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
 
