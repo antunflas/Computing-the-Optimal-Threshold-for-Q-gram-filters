@@ -41,6 +41,13 @@ int main() {
 
 	std::cout << "Hello World!" << std::endl;
 
+	cout << "Test case 1 - given result: " << testThresholdOneShape1()
+			<< " expected result: 1" << endl;
+	cout << "Test case 2 - given result: " << testThresholdOneShape2()
+			<< " expected result: 2" << endl;
+
+	testThresholdForAllShapesWithSomeQAndKVariableS(3, 5);
+
 	std::string s;
 	std::getline(std::cin, s);
 	return 0;
@@ -61,7 +68,8 @@ int calculateThreshold(int s, int k, int m, int q, int* result) {
 	return threshold;
 }
 
-int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen) {
+int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
+		int arrayQLen) {
 	int* arrayM = new int[s - 1];
 	int arrayMLen = 0;
 
@@ -70,19 +78,13 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen) 
 	int result = MAX_INT;
 	for (long long int counter = 0; counter < limit; counter++) {
 		toBinary(counter, binary, s - 1);
-		//fillFromBinary(binary, 1, s - 1, &M);
-		//cout << "M = ";
 		arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
-		//cout << endl;
-		//result = min(findThreshold(s, k, Q, &M, m, k), result);
 		result = min(
-			findThreshold(s, k, arrayQ, arrayQLen, arrayM, arrayMLen, m, k),
-			result);
+				findThreshold(s, k, arrayQ, arrayQLen, arrayM, arrayMLen, m, k),
+				result);
 	}
 	return result;
 }
-
-
 
 /*
  Generate list of shapes...
@@ -108,7 +110,6 @@ int** generateShapes(int s, int q, int* shapesLen) {
 	}
 	return shapes;
 }
-
 
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 		int j) {
@@ -203,13 +204,58 @@ int fillFromBinary(bool* binary, int start, int end, int* arrayM, int offset) {
 }
 
 /*
-Converts long number to binary array.
-Returns number of ones in array.
-*/
+ Converts long number to binary array.
+ Returns number of ones in array.
+ */
 int toBinary(long long int value, bool* array, int size) {
 	int counter = 0;
 	for (int i = 0; i < size; i++) {
 		counter += array[size - i - 1] = value & (1 << i);
 	}
 	return counter;
+}
+
+/*	======================== TESTS ========================= */
+
+int testThresholdOneShape1() {
+	// shape is #-##
+	int* Q = new int[3] { 0, 2, 3 };
+	int s = 4;
+	//int q = 3;
+	int k = 3;
+	int m = 11;
+	return calculateThresholdForShape(s, k, m, Q, 3);
+}
+
+int testThresholdOneShape2() {
+	int* Q = new int[3] { 0, 1, 3 };
+	int s = 4;
+	//int q = 3;
+	int k = 3;
+	int m = 13;
+	return calculateThresholdForShape(s, k, m, Q, 3);
+}
+
+int* arrayForQ(int q) {
+	if (q == 2) {
+		return new int[45] { 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27,
+				26, 25, 24, 23, 22, 21, 20, 19, 18, 18, 19, 20, 19, 18, 17, 16,
+				15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+	} else if (q == 3) {
+		return new int[44] { 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21,
+				20, 19, 18, 17, 16, 15, 15, 15, 15, 15, 15, 14, 13, 12, 11, 10,
+				10, 10, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+	}
+	return new int[45];
+}
+
+void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k) {
+	int* result;
+	int* array = arrayForQ(q);
+	for (int s = q; s <= (50 - k); s++) {
+		int value = calculateThreshold(s, k, 50, q, result);
+		bool sat = array[s - q] == value;
+		cout << "s: " << s << " threshold: " << value << " satisfied: " << sat
+				<< endl;
+	}
 }
