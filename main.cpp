@@ -83,33 +83,6 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen) 
 }
 
 
-
-/*
- Generate list of shapes...
- */
-int** generateShapes(int s, int q, int* shapesLen) {
-	int start = 1;
-	int end = s - 2;
-	int len = end - start + 1;
-	long long int countTo = pow(2, len);
-	int** shapes = new int*[countTo];
-	*shapesLen = 0;
-	bool* array = new bool[len];
-	for (long long int counter = 0; counter < countTo; counter++) {
-		int onesCount = toBinary(counter, array, len);
-		if (onesCount == (q - 2)) {
-			int* arrayQ = new int[q];
-			fillFromBinary(array, start, end, arrayQ, 1);
-			arrayQ[0] = 0;
-			arrayQ[q - 1] = s - 1;
-			shapes[*shapesLen] = arrayQ;
-			*shapesLen = *shapesLen + 1;
-		}
-	}
-	return shapes;
-}
-
-
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 		int j) {
 
@@ -183,6 +156,31 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	free(nextM1);
 	free(nextM2);
 	return result;
+}
+
+/*
+ Generate list of shapes...
+ */
+int** generateShapes(int s, int q, int* shapesLen) {
+	int start = 1;
+	int end = s - 2;
+	int len = end - start + 1;
+	long long int countTo = pow(2, len);
+	int** shapes = new int*[countTo];
+	*shapesLen = 0;
+	bool* array = new bool[len];
+	for (long long int counter = 0; counter < countTo; counter++) {
+		int onesCount = toBinary(counter, array, len);
+		if (onesCount == (q - 2)) {
+			int* arrayQ = new int[q];
+			fillFromBinary(array, start, end, arrayQ, 1);
+			arrayQ[0] = 0;
+			arrayQ[q - 1] = s - 1;
+			shapes[*shapesLen] = arrayQ;
+			*shapesLen = *shapesLen + 1;
+		}
+	}
+	return shapes;
 }
 
 /*
