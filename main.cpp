@@ -55,3 +55,15 @@ int fillFromBinary(bool* binary, int start, int end, int* arrayM, int offset) {
 	}
 	return arrayMLen;
 }
+
+/*
+Converts long number to binary array.
+Returns number of ones in array.
+*/
+int toBinary(long long int value, bool* array, int size) {
+	int counter = 0;
+	for (int i = 0; i < size; i++) {
+		counter += array[size - i - 1] = value & (1 << i);
+	}
+	return counter;
+}
