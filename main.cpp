@@ -1,4 +1,6 @@
 #include <iostream>
+#include <limits>
+#include <cmath>
 
 using namespace std;
 
@@ -35,4 +37,21 @@ void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k);
 int main() {
 	std::cout << "Hello World!" << std::endl;
 	return 0;
+}
+
+/*
+ Fill arrayM array with numbers from start to end where is one in binary.
+ Like there is an array of [start, start + 1, ..., end - 1, end] and in arrayM
+ are copied values on indexes where is one in binary array.
+ start and end are both inclusive
+ */
+int fillFromBinary(bool* binary, int start, int end, int* arrayM, int offset) {
+	int len = end - start + 1;
+	int arrayMLen = offset;
+	for (int c = 0; c < len; c++) {
+		if (binary[c] == 1) {
+			arrayM[arrayMLen++] = start + c;
+		}
+	}
+	return arrayMLen;
 }
