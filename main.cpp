@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
 #include <cmath>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -62,6 +63,82 @@ int** generateShapes(int s, int q, int* shapesLen) {
 		}
 	}
 	return shapes;
+}
+
+
+int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
+		int j) {
+
+	/*	check constraints */
+
+	if (!(j >= 0 && j <= k)) {
+		return MAX_INT;
+	}
+	for (int c = 0; c < lenM; c++) {
+		if (!(M[c] >= 1 && M[c] <= (s - 1))) {
+			return MAX_INT;
+		}
+	}
+
+	if (lenM < (s - 1 - j)) {
+		return MAX_INT;
+	}
+	if (i < s) {
+		return 0;
+	}
+
+	/*	generate next Ms */
+	int* nextM1 = new int[lenM + 1];
+	int* nextM2 = new int[lenM];
+	int lenNextM1 = 1;
+	int lenNextM2 = 0;
+	nextM1[0] = 1;
+	for (int c = 0; c < lenM; c++) {
+		if (M[c] == (s - 1))
+			continue;
+		nextM1[c + 1] = M[c] + 1;
+		lenNextM1++;
+		nextM2[c] = M[c] + 1;
+		lenNextM2++;
+	}
+
+	/*	determine if Q is subset of Mu{0} */
+	bool isSubset = true;
+	for (int c = 0; c < lenQ; c++) {
+		if (Q[c] == 0)
+			continue;
+		bool found = false;
+		for (int d = 0; d < lenM; d++) {
+			if (Q[c] == M[d]) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			isSubset = false;
+			break;
+		}
+	}
+
+	/*	calculate nextJ (j or j-1) */
+	int nextJ = j;
+	bool contains = false;
+	for (int c = 0; c < lenM; c++) {
+		if (M[c] == (s - 1)) {
+			contains = true;
+			break;
+		}
+	}
+	if (!contains)
+		nextJ--;
+
+	int result = min(
+			findThreshold(s, k, Q, lenQ, nextM1, lenNextM1, i - 1, nextJ)
+					+ (isSubset ? 1 : 0),
+			findThreshold(s, k, Q, lenQ, nextM2, lenNextM2, i - 1, nextJ));
+	free(nextM1);
+	free(nextM2);
+	return result;
 }
 
 /*
