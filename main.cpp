@@ -46,6 +46,44 @@ int main() {
 	return 0;
 }
 
+int calculateThreshold(int s, int k, int m, int q, int* result) {
+	int shapesLen = 0;
+	int** shapes = generateShapes(s, q, &shapesLen);
+	int threshold = 0;
+	for (int i = 0; i < shapesLen; i++) {
+		int* shape = shapes[i];
+		int value = calculateThresholdForShape(s, k, m, shape, q);
+		if (threshold < value) {
+			threshold = value;
+			result = shape;
+		}
+	}
+	return threshold;
+}
+
+int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen) {
+	int* arrayM = new int[s - 1];
+	int arrayMLen = 0;
+
+	long long int limit = pow(2, s - 1);
+	bool* binary = new bool[s - 1];
+	int result = MAX_INT;
+	for (long long int counter = 0; counter < limit; counter++) {
+		toBinary(counter, binary, s - 1);
+		//fillFromBinary(binary, 1, s - 1, &M);
+		//cout << "M = ";
+		arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
+		//cout << endl;
+		//result = min(findThreshold(s, k, Q, &M, m, k), result);
+		result = min(
+			findThreshold(s, k, arrayQ, arrayQLen, arrayM, arrayMLen, m, k),
+			result);
+	}
+	return result;
+}
+
+
+
 /*
  Generate list of shapes...
  */
