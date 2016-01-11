@@ -2,6 +2,8 @@
 #include <limits>
 #include <cmath>
 #include <stdlib.h>
+#include <algorithm>
+#include <string>
 
 using namespace std;
 
@@ -36,7 +38,11 @@ int testThresholdOneShape2();
 void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k);
 
 int main() {
+
 	std::cout << "Hello World!" << std::endl;
+
+	std::string s;
+	std::getline(std::cin, s);
 	return 0;
 }
 
