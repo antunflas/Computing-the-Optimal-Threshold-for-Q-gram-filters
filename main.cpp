@@ -21,8 +21,8 @@ int** generateShapes(int s, int q, int* shapesLen);
 int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
 
 /*  ona rekurzivna funkcija */
-int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
-		int j);
+void findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
+	int j, long long int offset);
 
 int getTresholdFor(int s, int k, int j, int* M, int lenM, int** tresholds,
 		int lenTresholds);
@@ -153,8 +153,8 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 	return result;
 }
 
-int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
-		int j, int** tresholds, int lenTreshold) {
+void findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
+		int j, int** tresholds, int lenTreshold, long long int offset) {
 
 	//lenTresholds je duljina prve dimenzije, duljina druge dimenzije zapisana na indexu 0
 	// u svakom malom polju druge dim
@@ -162,15 +162,14 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	//ova fja zapravo zapisuje treshold u polje, ne vraæa ništa
 
 	//zapis na poziciju tresholds[prvi index][drugi index] :
-	//prvi index: (M -> dekadski) - offset
-	//drugi index: (k - j + 1)
+	bool* binaryM;
+	toBinary(M, lenM, binaryM, s-1);
+	int idx1 = fromBinary(binaryM, s-1) - offset;
+	int idx2 = k-j+1;
 
-	//
+	
 	if (i < s) {
-
-		//zapisi 0
-
-		return 0;
+		tresholds[idx1][idx2] = 0;
 	}
 
 	/**OSTAJE ISTO**/
@@ -220,29 +219,9 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	if (!contains)
 		nextJ--;
 
-	/** KRAJ OSTAJE ISTO**/
-
-
-	int result = min(getTresholdFor(s, k, nextJ, nextM1, lenNextM1, tresholds, lenTreshold)
-					+ (isSubset ? 1 : 0),
-					getTresholdFor(s, k, nextJ, nextM2, lenNextM2, tresholds, lenTreshold));
-
-
-
-	/** NE TREBA **/
-
-	/*
-	int result = min(
-			findThreshold(s, k, Q, lenQ, nextM1, lenNextM1, i - 1, nextJ)
-					+ (isSubset ? 1 : 0),
-			findThreshold(s, k, Q, lenQ, nextM2, lenNextM2, i - 1, nextJ));
-
-			*/
-
-	/** KRAJ NE TREBA **/
-	free(nextM1);
-	free(nextM2);
-	return result;
+	tresholds[idx1][idx2] = min(getTresholdFor(s, k, nextJ, nextM1, lenNextM1, tresholds, lenTreshold)
+		+ (isSubset ? 1 : 0),
+		getTresholdFor(s, k, nextJ, nextM2, lenNextM2, tresholds, lenTreshold));
 }
 
 int getTresholdFor(int s, int k, int offset, int j, int* M, int lenM, int** tresholds,
