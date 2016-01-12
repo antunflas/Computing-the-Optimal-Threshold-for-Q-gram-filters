@@ -18,7 +18,7 @@ int calculateThreshold(int s, int k, int m, int q, int* result);
 int** generateShapes(int s, int q, int* shapesLen);
 
 /*  raèuna threshold za odreðeni Q */
-int calculateThresholdForShape(int s, int k, int m, int* Q, int q);
+int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
 
 /*  ona rekurzivna funkcija */
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
@@ -42,9 +42,10 @@ int testThresholdOneShape1();
 int testThresholdOneShape2();
 void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k);
 
-int main() {
+int main(int argc, char** argv) {
 
 	/*  Argumenti: m, k, s, q */
+
 	int m = 13;
 	int k = 2;
 	int s = 4;
@@ -61,16 +62,17 @@ int main() {
 
 	cout << "binomial(5,3) = " << binomialCoefficient(5, 3) << endl;
 
-	/*
+	k = atoi(argv[1]);
+	q = atoi(argv[2]);
 
 	cout << "Test case 1 - given result: " << testThresholdOneShape1()
 			<< " expected result: 1" << endl;
 	cout << "Test case 2 - given result: " << testThresholdOneShape2()
 			<< " expected result: 2" << endl;
 
-	*/
+	cout << "k=" << k << " q=" << q << endl;
 
-	//testThresholdForAllShapesWithSomeQAndKVariableS(3, 5);
+	testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
 
 	std::string stringManuela;
 	std::getline(std::cin, stringManuela);
@@ -299,22 +301,109 @@ int testThresholdOneShape2() {
 	return calculateThresholdForShape(s, k, m, Q, 3);
 }
 
-int* arrayForQ(int q) {
-	if (q == 2) {
-		return new int[45] { 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27,
-				26, 25, 24, 23, 22, 21, 20, 19, 18, 18, 19, 20, 19, 18, 17, 16,
-				15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
-	} else if (q == 3) {
-		return new int[44] { 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21,
-				20, 19, 18, 17, 16, 15, 15, 15, 15, 15, 15, 14, 13, 12, 11, 10,
-				10, 10, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+int* arrayForQ(int q, int k) {
+	if (k == 5) {
+		if (q == 2) {
+			return new int[45] { 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28,
+					27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 18, 19, 20, 19, 18,
+					17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+		} else if (q == 3) {
+			return new int[44] { 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22,
+					21, 20, 19, 18, 17, 16, 15, 15, 15, 15, 15, 15, 14, 13, 12,
+					11, 10, 10, 10, 11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+		} else if (q == 4) {
+			return new int[43] { 27, 26, 25, 24, 23, 22, 21, 20, 19, 19, 17, 17,
+					16, 15, 14, 14, 13, 12, 12, 12, 13, 13, 14, 14, 13, 12, 11,
+					10, 9, 8, 7, 6, 6, 7, 7, 7, 6, 5, 4, 3, 2, 1 };
+		} else if (q == 5) {
+			return new int[42] { 21, 20, 19, 18, 18, 18, 16, 16, 15, 14, 13, 13,
+					12, 11, 11, 10, 9, 9, 9, 9, 9, 9, 9, 8, 8, 7, 7, 7, 6, 6, 6,
+					5, 4, 4, 4, 4, 5, 4, 3, 2, 1 };
+		} else if (q == 6) {
+			return new int[41] { 15, 14, 13, 14, 13, 13, 12, 12, 11, 10, 10, 9,
+					8, 8, 7, 7, 6, 6, 7, 7, 8, 9, 8, 8, 6, 7, 5, 6, 6, 6, 5, 4,
+					3, 3, 2, 3, 3, 3, 2, 1 };
+		} else if (q == 7) {
+			return new int[40] { 9, 8, 9, 10, 10, 9, 9, 8, 8, 7, 7, 6, 6, 5, 5,
+					4, 4, 4, 4, 5, 6, 5, 5, 4, 4, 3, 3, 3, 3, 2, 3, 2, 2, 2, 1,
+					1, 2, 2, 1 };
+		} else if (q == 8) {
+			return new int[39] { 3, 5, 6, 7, 7, 6, 6, 5, 5, 5, 4, 4, 3, 3, 2, 2,
+					2, 3, 3, 4, 4, 5, 4, 4, 3, 2, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1,
+					1, 1 };
+		} else if (q == 9) {
+			return new int[38] { 0, 3, 4, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 1, 1, 1,
+					1, 2, 2, 3, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0,
+					0 };
+		} else if (q == 10) {
+			return new int[37] { 0, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 1,
+					1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
+		} else if (q == 11) {
+			return new int[36] { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+					1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0 };
+		} else if (q == 12) {
+			return new int[35] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+					0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		}
+	} else if (k == 4) {
+		if (q == 2) {
+			return new int[45] { 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30,
+					29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 20, 21, 20, 19,
+					18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2,
+					1 };
+		} else if (q == 3) {
+			return new int[44] { 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25,
+					24, 23, 22, 21, 20, 19, 18, 17, 17, 17, 17, 17, 16, 15, 14,
+					13, 12, 11, 12, 12, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+		} else if (q == 4) {
+			return new int[43] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20,
+					19, 18, 17, 17, 16, 15, 15, 14, 15, 15, 16, 16, 15, 14, 13,
+					12, 11, 10, 9, 8, 7, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1 };
+		} else if (q == 5) {
+			return new int[42] { 26, 25, 24, 23, 22, 21, 20, 20, 19, 18, 17, 16,
+					16, 15, 14, 13, 12, 12, 12, 12, 12, 12, 12, 11, 10, 9, 9, 9,
+					8, 8, 8, 7, 6, 5, 5, 5, 6, 5, 4, 3, 2, 1 };
+		} else if (q == 6) {
+			return new int[41] { 21, 20, 19, 18, 17, 17, 17, 16, 15, 14, 14, 13,
+					12, 12, 11, 10, 9, 9, 10, 10, 11, 12, 11, 10, 9, 9, 7, 8, 8,
+					8, 7, 6, 5, 4, 3, 4, 4, 4, 3, 2, 1 };
+		} else if (q == 7) {
+			return new int[40] { 16, 15, 14, 13, 14, 13, 13, 12, 12, 11, 11, 10,
+					9, 9, 8, 7, 7, 7, 7, 8, 8, 8, 8, 7, 6, 5, 5, 5, 4, 4, 4, 4,
+					4, 3, 2, 2, 3, 3, 2, 1 };
+		} else if (q == 8) {
+			return new int[39] { 11, 10, 9, 10, 10, 10, 10, 9, 9, 9, 8, 7, 7, 6,
+					6, 5, 5, 5, 6, 7, 7, 7, 6, 6, 5, 4, 4, 4, 4, 4, 4, 4, 3, 2,
+					2, 2, 2, 2, 1 };
+		} else if (q == 9) {
+			return new int[38] { 6, 5, 7, 8, 8, 8, 7, 7, 7, 6, 6, 5, 5, 4, 4, 4,
+					4, 4, 5, 6, 5, 4, 4, 3, 3, 4, 4, 4, 3, 3, 2, 2, 2, 2, 1, 1,
+					1, 1 };
+		} else if (q == 10) {
+			return new int[37] { 1, 4, 5, 6, 5, 5, 5, 5, 5, 4, 4, 3, 3, 2, 2, 3,
+					3, 4, 4, 4, 4, 4, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
+					1 };
+		} else if (q == 11) {
+			return new int[36] { 0, 2, 3, 4, 3, 3, 4, 3, 3, 3, 2, 2, 2, 1, 2, 2,
+					3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0,
+					0 };
+		} else if (q == 12) {
+			return new int[35] { 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 21, 1, 1, 1, 1,
+					2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
+		} else if (q == 13) {
+			return new int[34] { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1,
+					1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
+		} else if (q == 14) {
+			return new int[33] { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+					1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		}
 	}
 	return new int[45];
 }
 
 void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k) {
 	int* result;
-	int* array = arrayForQ(q);
+	int* array = arrayForQ(q, k);
 	for (int s = q; s <= (50 - k); s++) {
 		int value = calculateThreshold(s, k, 50, q, result);
 		bool sat = array[s - q] == value;
