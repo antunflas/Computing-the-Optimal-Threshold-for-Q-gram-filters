@@ -30,6 +30,8 @@ int toBinary(long long int value, bool* array, int size);
 /*	*/
 int fillFromBinary(bool* binary, int start, int end, int* arrayM, int offset);
 
+long long int binomialCoefficient(int m, int n);
+
 /*
  Tests
  */
@@ -41,15 +43,22 @@ int main() {
 
 	std::cout << "Hello World!" << std::endl;
 
+	cout << binomialCoefficient(5, 3) << endl;
+
+	/*
+
 	cout << "Test case 1 - given result: " << testThresholdOneShape1()
 			<< " expected result: 1" << endl;
 	cout << "Test case 2 - given result: " << testThresholdOneShape2()
 			<< " expected result: 2" << endl;
 
-	testThresholdForAllShapesWithSomeQAndKVariableS(3, 5);
+	*/
+
+	//testThresholdForAllShapesWithSomeQAndKVariableS(3, 5);
 
 	std::string s;
 	std::getline(std::cin, s);
+
 	return 0;
 }
 
@@ -213,6 +222,18 @@ int toBinary(long long int value, bool* array, int size) {
 		counter += array[size - i - 1] = value & (1 << i);
 	}
 	return counter;
+}
+
+
+long long int binomialCoefficient(int m, int n) {
+	long long int result = 1;
+	for(int i = m; i > m - n; i--) {
+		result *= i;
+	}
+	for(int i = 2; i <= n; i++) {
+		result /= i;
+	}
+	return result;
 }
 
 /*	======================== TESTS ========================= */
