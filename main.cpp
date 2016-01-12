@@ -41,9 +41,22 @@ void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k);
 
 int main() {
 
-	std::cout << "Hello World!" << std::endl;
+	/*  Argumenti: m, k, s, q */
+	int m = 13;
+	int k = 2;
+	int s = 4;
+	int q = 3;
 
-	cout << binomialCoefficient(5, 3) << endl;
+	long long int tresholdsArrayLength = 0;
+	for(int j = 0; j <= k; j++) {
+		tresholdsArrayLength += binomialCoefficient(s - 1, j);
+	}
+	cout << "array length = " << tresholdsArrayLength << endl;
+
+	long long int offset = pow(2, s - 1) - tresholdsArrayLength;
+	cout << "offset = " << offset << endl;
+
+	cout << "binomial(5,3) = " << binomialCoefficient(5, 3) << endl;
 
 	/*
 
@@ -56,8 +69,8 @@ int main() {
 
 	//testThresholdForAllShapesWithSomeQAndKVariableS(3, 5);
 
-	std::string s;
-	std::getline(std::cin, s);
+	std::string stringManuela;
+	std::getline(std::cin, stringManuela);
 
 	return 0;
 }
