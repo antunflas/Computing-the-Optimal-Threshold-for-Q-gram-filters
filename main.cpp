@@ -27,6 +27,9 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 /*	*/
 int toBinary(long long int value, bool* array, int size);
 
+/* */
+long long int fromBinary(bool* array, int count);
+
 /*	*/
 int fillFromBinary(bool* binary, int start, int end, int* arrayM, int offset);
 
@@ -237,6 +240,16 @@ int toBinary(long long int value, bool* array, int size) {
 	return counter;
 }
 
+long long int fromBinary(bool* array, int count)
+{
+	long long int ret = 0;
+	int tmp;
+	for (int i = 0; i < count; i++) {
+		tmp = array[i];
+		ret |= tmp << (count - i - 1);
+	}
+	return ret;
+}
 
 long long int binomialCoefficient(int m, int n) {
 	long long int result = 1;
