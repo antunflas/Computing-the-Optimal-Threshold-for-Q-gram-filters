@@ -4,10 +4,12 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <string>
+#include <vector>
 
 using namespace std;
 
 static const int MAX_INT = std::numeric_limits<int>::max();
+static vector<int*> empty_vector;
 
 /*  poèetna funkcija koju zovemo iz maina */
 int calculateThreshold(int s, int k, int m, int q, int* result);
@@ -15,10 +17,14 @@ int calculateThreshold(int s, int k, int m, int q, int* result);
 /*  generira sve Q koje treba ispitati
  kasnije bi možda bilo pametno ovo preoblikovati tako da izraèuna koji su pozitivni thresholdi pa vrati samo te Q.
  */
-int** generateShapes(int s, int q, int* shapesLen);
+vector<int*> generateShapes(int s, int q);
 
 /*  raèuna threshold za odreðeni Q */
 int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
+
+int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
+		int arrayQLen, int** thresholds, long long int offset,
+		long long int thresholdLen, int** copy);
 
 /*  ona rekurzivna funkcija */
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
@@ -34,6 +40,8 @@ long long int fromBinary(bool* array, int count);
 int fillFromBinary(bool* binary, int start, int end, int* arrayM, int offset);
 
 long long int binomialCoefficient(int m, int n);
+
+long long int calculateThresholdArrayLength(int k, int s);
 
 /*
  Tests
@@ -51,19 +59,18 @@ int main(int argc, char** argv) {
 	int s = 4;
 	int q = 3;
 
-	long long int tresholdsArrayLength = 0;
-	for(int j = 0; j <= k; j++) {
-		tresholdsArrayLength += binomialCoefficient(s - 1, j);
-	}
-	cout << "array length = " << tresholdsArrayLength << endl;
+	int thresholdsArrayLength = calculateThresholdArrayLength(k, s);
+	cout << "array length = " << thresholdsArrayLength << endl;
 
-	long long int offset = pow(2, s - 1) - tresholdsArrayLength;
+	long long int offset = pow(2, s - 1) - thresholdsArrayLength;
 	cout << "offset = " << offset << endl;
 
 	cout << "binomial(5,3) = " << binomialCoefficient(5, 3) << endl;
 
-	k = atoi(argv[1]);
-	q = atoi(argv[2]);
+	if (argc >= 3) {
+		k = atoi(argv[1]);
+		q = atoi(argv[2]);
+	}
 
 	cout << "Test case 1 - given result: " << testThresholdOneShape1()
 			<< " expected result: 1" << endl;
@@ -80,18 +87,66 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
+long long int calculateThresholdArrayLength(int k, int s) {
+	long long int thresholdsArrayLength = 0;
+	for (int j = 0; j <= k; j++) {
+		thresholdsArrayLength += binomialCoefficient(s - 1, j);
+	}
+	return thresholdsArrayLength;
+}
+
 int calculateThreshold(int s, int k, int m, int q, int* result) {
 	int shapesLen = 0;
-	int** shapes = generateShapes(s, q, &shapesLen);
+	cout << "generating" << endl;
+	vector<int*> shapes = generateShapes(s, q);
+	cout << "SHAPES LEN: " << shapesLen << endl;
 	int threshold = 0;
-	for (int i = 0; i < shapesLen; i++) {
+	long long int thresholdArrayLength = calculateThresholdArrayLength(k, s);
+	cout << "tu" << endl;
+	int** thresholds = new int*[thresholdArrayLength];
+	cout << "created with " << thresholdArrayLength << endl;
+	int** copy = new int*[thresholdArrayLength];
+	bool* binary = new bool[s - 1];
+	long long int offset = pow(2, s - 1) - thresholdArrayLength;
+	for (long long int index = 0; index < thresholdArrayLength; index++) {
+		int ones = toBinary(index + offset, binary, s - 1);
+		int* arrayJ = new int[ones + 1];
+		arrayJ[0] = ones;
+		copy[index] = new int[ones + 1];
+		copy[index][0] = ones;
+		for (int j = 1, jLen = ones + 1; j < jLen; j++) {
+			arrayJ[j] = 0;
+			copy[index][j] = 0;
+		}
+		thresholds[index] = arrayJ;
+	}
+
+	for (unsigned int i = 0; i < shapes.size(); i++) {
 		int* shape = shapes[i];
-		int value = calculateThresholdForShape(s, k, m, shape, q);
+		int value = myCalculateThresholdForShape(s, k, m, shape, q, thresholds,
+				offset, thresholdArrayLength, copy);
 		if (threshold < value) {
 			threshold = value;
 			result = shape;
 		}
 	}
+	cout << "Deleting" << endl;
+	for (long long int index = 0; index < thresholdArrayLength; index++) {
+		delete[] thresholds[index];
+		delete[] copy[index];
+	}
+	cout << "Deleted 2d" << endl;
+	delete[] thresholds;
+	cout << "Deleted threshold" << endl;
+	delete[] copy;
+	cout << "Deleted copy" << endl;
+	cout << "Deleted 2d shapes" << endl;
+	shapes.clear();
+	shapes.swap(empty_vector);
+	cout << "Deleted shapes" << endl;
+	delete[] binary;
+	cout << "Deleted all" << endl;
+	cout << "Free finish" << endl;
 	return threshold;
 }
 
@@ -111,6 +166,54 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 				result);
 	}
 	return result;
+}
+
+int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
+		int arrayQLen, int** thresholds, long long int offset,
+		long long int thresholdLen, int** copy) {
+	int* arrayM = new int[s - 1];
+	int arrayMLen = 0;
+	bool* binary = new bool[s - 1];
+
+	for (int i = s; i <= m; i++) {
+		for (long long int index = 0; index < thresholdLen; index++) {
+			toBinary(index + offset, binary, s - 1);
+			arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
+			for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
+				copy[index][j] = findThreshold(s, k, arrayQ, arrayQLen, arrayM,
+						arrayMLen, i, k - j + 1);
+			}
+		}
+		for (long long int index = 0; index < thresholdLen; index++) {
+			for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
+				thresholds[index][j] = copy[index][j];
+			}
+		}
+	}
+	int result = MAX_INT;
+	for (long long int index = 0; index < thresholdLen; index++) {
+		for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
+			if (result > thresholds[index][j]) {
+				result = thresholds[index][j];
+			}
+		}
+	}
+	free(arrayM);
+	return result;
+
+	/*
+	 long long int limit = pow(2, s - 1);
+
+	 int result = MAX_INT;
+	 for (long long int counter = 0; counter < limit; counter++) {
+	 toBinary(counter, binary, s - 1);
+	 arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
+	 result = min(
+	 findThreshold(s, k, arrayQ, arrayQLen, arrayM, arrayMLen, m, k),
+	 result);
+	 }
+	 return result;
+	 */
 }
 
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
@@ -191,13 +294,12 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 /*
  Generate list of shapes...
  */
-int** generateShapes(int s, int q, int* shapesLen) {
+vector<int*> generateShapes(int s, int q) {
 	int start = 1;
 	int end = s - 2;
 	int len = end - start + 1;
 	long long int countTo = pow(2, len);
-	int** shapes = new int*[countTo];
-	*shapesLen = 0;
+	vector<int*> shapes;
 	bool* array = new bool[len];
 	for (long long int counter = 0; counter < countTo; counter++) {
 		int onesCount = toBinary(counter, array, len);
@@ -206,8 +308,7 @@ int** generateShapes(int s, int q, int* shapesLen) {
 			fillFromBinary(array, start, end, arrayQ, 1);
 			arrayQ[0] = 0;
 			arrayQ[q - 1] = s - 1;
-			shapes[*shapesLen] = arrayQ;
-			*shapesLen = *shapesLen + 1;
+			shapes.push_back(arrayQ);
 		}
 	}
 	return shapes;
@@ -242,8 +343,7 @@ int toBinary(long long int value, bool* array, int size) {
 	return counter;
 }
 
-long long int fromBinary(bool* array, int count)
-{
+long long int fromBinary(bool* array, int count) {
 	long long int ret = 0;
 	int tmp;
 	for (int i = 0; i < count; i++) {
@@ -255,10 +355,10 @@ long long int fromBinary(bool* array, int count)
 
 long long int binomialCoefficient(int m, int n) {
 	long long int result = 1;
-	for(int i = m; i > m - n; i--) {
+	for (int i = m; i > m - n; i--) {
 		result *= i;
 	}
-	for(int i = 2; i <= n; i++) {
+	for (int i = 2; i <= n; i++) {
 		result /= i;
 	}
 	return result;
@@ -369,8 +469,7 @@ int* arrayForQ(int q, int k) {
 					1 };
 		} else if (q == 11) {
 			return new int[36] { 0, 2, 3, 4, 3, 3, 4, 3, 3, 3, 2, 2, 2, 1, 2, 2,
-					3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0,
-					0 };
+					3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0, 0 };
 		} else if (q == 12) {
 			return new int[35] { 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 21, 1, 1, 1, 1,
 					2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
