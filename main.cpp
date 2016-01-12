@@ -51,6 +51,21 @@ int main(int argc, char** argv) {
 
 	/*  Argumenti: m, k, s, q */
 
+	/*
+	if(argc < 5) {
+		cerr << "Expected 4 arguments: " << endl;
+		cerr << "\t" m - string length << endl;
+		cerr << "\t" k - number of differences << endl;
+		cerr << "\t" s - span of shape << endl;
+		cerr << "\t" q -  << endl;
+	}
+	int m = argv[1];
+	int k = argv[2];
+	int s = argv[3];
+	int q = argv[4];
+
+	*/
+
 	int m = 13;
 	int k = 2;
 	int s = 4;
