@@ -27,6 +27,8 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 /*	*/
 int toBinary(long long int value, bool* array, int size);
 
+void toBinary(int* M, int lenM, bool* binary, int size);
+
 /* */
 long long int fromBinary(bool* array, int count);
 
@@ -51,8 +53,24 @@ int main(int argc, char** argv) {
 	int s = 4;
 	int q = 3;
 
+	int* probaM = new int[3] {2,3, 5};
+	for(int i = 0; i < 3; i++) {
+		cout << probaM[i];
+	}
+	cout << endl;
+
+	bool* binaryM = new bool[3];
+	toBinary(probaM, 3, binaryM, 5);
+
+	for(int i = 0; i < 5; i++) {
+		cout << binaryM[i];
+	}
+	cout << endl;
+
+	/*
+
 	long long int tresholdsArrayLength = 0;
-	for(int j = 0; j <= k; j++) {
+	for (int j = 0; j <= k; j++) {
 		tresholdsArrayLength += binomialCoefficient(s - 1, j);
 	}
 	cout << "array length = " << tresholdsArrayLength << endl;
@@ -76,6 +94,8 @@ int main(int argc, char** argv) {
 
 	std::string stringManuela;
 	std::getline(std::cin, stringManuela);
+
+	*/
 
 	return 0;
 }
@@ -103,15 +123,14 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 	//za i = s do m:
 	//		treba proæ po polju thresholds
 	//		za svaku poziciju izraèunati M, j:
-					//M = (index + offset) -> toBinary -> fillBinary
-					//j = k - index
+	//M = (index + offset) -> toBinary -> fillBinary
+	//j = k - index
 	//		treshold = pozvati findTreshold s tim M i j
 	// 		zapisati taj treshold na tu pozciju
 
 	//sada na kraju treba proæi cijelo polje (ovu prvu dim) i sa indeksa 1 (
 	//na prvom je duljina) u polju druge dim
 	//proèitati vrijednost praga i od svih njih treba uzeti min
-
 
 	int* arrayM = new int[s - 1];
 	int arrayMLen = 0;
@@ -122,9 +141,11 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 	for (long long int counter = 0; counter < limit; counter++) {
 		toBinary(counter, binary, s - 1);
 		arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
+		/*
 		result = min(
 				findThreshold(s, k, arrayQ, arrayQLen, arrayM, arrayMLen, m, k),
 				result);
+				*/
 	}
 	return result;
 }
@@ -136,9 +157,10 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	// u svakom malom polju druge dim
 
 	//ova fja zapravo zapisuje treshold u polje, ne vraæa ništa
+
 	//zapis na poziciju tresholds[prvi index][drugi index] :
-		//prvi index: (M -> dekadski) - offset
-		//drugi index: (k - j)
+	//prvi index: (M -> dekadski) - offset
+	//drugi index: (k - j + 1)
 
 	//
 	if (i < s) {
@@ -195,19 +217,24 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	if (!contains)
 		nextJ--;
 
-
 	/** KRAJ OSTAJE ISTO**/
 
-	//result = min (getTresholdFor(s, k, nextJ, nextM1, lenNextM1, tresholds, lenTresholds)
-	//				+ (isSubset ? 1 : 0),
-	//				getTresholdFor(s, k, nextJ, nextM2, lenNextM2, tresholds, lenTresholds));
-	//
+
+	int result = min(getTresholdFor(s, k, nextJ, nextM1, lenNextM1, tresholds, lenTreshold)
+					+ (isSubset ? 1 : 0),
+					getTresholdFor(s, k, nextJ, nextM2, lenNextM2, tresholds, lenTreshold));
+
+
 
 	/** NE TREBA **/
+
+	/*
 	int result = min(
 			findThreshold(s, k, Q, lenQ, nextM1, lenNextM1, i - 1, nextJ)
 					+ (isSubset ? 1 : 0),
 			findThreshold(s, k, Q, lenQ, nextM2, lenNextM2, i - 1, nextJ));
+
+			*/
 
 	/** KRAJ NE TREBA **/
 	free(nextM1);
@@ -215,20 +242,29 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	return result;
 }
 
+int getTresholdFor(int s, int k, int j, int* M, int lenM, int** tresholds,
+		int lenTresholds) {
 
-int getTresholdFor(int s, int k, int j, int* M, int lenM, int** tresholds, int lenTresholds) {
 	if (!(j >= 0 && j <= k)) {
+		return MAX_INT;
+	}
+	for (int c = 0; c < lenM; c++) {
+		if (!(M[c] >= 1 && M[c] <= (s - 1))) {
 			return MAX_INT;
 		}
-		for (int c = 0; c < lenM; c++) {
-			if (!(M[c] >= 1 && M[c] <= (s - 1))) {
-				return MAX_INT;
-			}
-		}
+	}
 
-		if (lenM < (s - 1 - j)) {
-			return MAX_INT;
-		}
+	if (lenM < (s - 1 - j)) {
+		return MAX_INT;
+	}
+
+	bool* mBinary = new bool[s-1];
+	toBinary(M, lenM, mBinary, s-1);
+
+	//zapis na poziciju tresholds[prvi index][drugi index] :
+	//prvi index: (M -> dekadski) - offset
+	//drugi index: (k - j + 1)
+
 
 
 }
@@ -287,8 +323,7 @@ int toBinary(long long int value, bool* array, int size) {
 	return counter;
 }
 
-long long int fromBinary(bool* array, int count)
-{
+long long int fromBinary(bool* array, int count) {
 	long long int ret = 0;
 	int tmp;
 	for (int i = 0; i < count; i++) {
@@ -298,12 +333,21 @@ long long int fromBinary(bool* array, int count)
 	return ret;
 }
 
+void toBinary(int* M, int lenM, bool* binary, int size) {
+	for(int i = 0; i < size; i++){
+		binary[i] = false;
+	}
+	for(int i = 0; i < lenM; i++) {
+		binary[M[i] - 1] = true;
+	}
+}
+
 long long int binomialCoefficient(int m, int n) {
 	long long int result = 1;
-	for(int i = m; i > m - n; i--) {
+	for (int i = m; i > m - n; i--) {
 		result *= i;
 	}
-	for(int i = 2; i <= n; i++) {
+	for (int i = 2; i <= n; i++) {
 		result /= i;
 	}
 	return result;
@@ -414,8 +458,7 @@ int* arrayForQ(int q, int k) {
 					1 };
 		} else if (q == 11) {
 			return new int[36] { 0, 2, 3, 4, 3, 3, 4, 3, 3, 3, 2, 2, 2, 1, 2, 2,
-					3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0,
-					0 };
+					3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0, 0, 0, 0, 0 };
 		} else if (q == 12) {
 			return new int[35] { 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 21, 1, 1, 1, 1,
 					2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
