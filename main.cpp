@@ -21,10 +21,10 @@ int** generateShapes(int s, int q, int* shapesLen);
 int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
 
 /*  ona rekurzivna funkcija */
-void findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
-	int j, long long int offset);
+void setThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
+		int j, int** tresholds, long long int lenTreshold, long long int offset);
 
-int getTresholdFor(int s, int k, int j, int* M, int lenM, int** tresholds,
+int getTresholdFor(int s, int k, int offset, int j, int* M, int lenM, int** tresholds,
 		int lenTresholds);
 
 /*	*/
@@ -56,8 +56,8 @@ int main(int argc, char** argv) {
 	int s = 4;
 	int q = 3;
 
-	int* probaM = new int[3] {2,3, 5};
-	for(int i = 0; i < 3; i++) {
+	int* probaM = new int[3] { 2, 3, 5 };
+	for (int i = 0; i < 3; i++) {
 		cout << probaM[i];
 	}
 	cout << endl;
@@ -65,40 +65,39 @@ int main(int argc, char** argv) {
 	bool* binaryM = new bool[3];
 	toBinary(probaM, 3, binaryM, 5);
 
-	for(int i = 0; i < 5; i++) {
+	for (int i = 0; i < 5; i++) {
 		cout << binaryM[i];
 	}
 	cout << endl;
 
 	/*
 
-	long long int tresholdsArrayLength = 0;
-	for (int j = 0; j <= k; j++) {
-		tresholdsArrayLength += binomialCoefficient(s - 1, j);
-	}
-	cout << "array length = " << tresholdsArrayLength << endl;
+	 long long int tresholdsArrayLength = 0;
+	 for (int j = 0; j <= k; j++) {
+	 tresholdsArrayLength += binomialCoefficient(s - 1, j);
+	 }
+	 cout << "array length = " << tresholdsArrayLength << endl;
 
-	long long int offset = pow(2, s - 1) - tresholdsArrayLength;
-	cout << "offset = " << offset << endl;
+	 long long int offset = pow(2, s - 1) - tresholdsArrayLength;
+	 cout << "offset = " << offset << endl;
 
-	cout << "binomial(5,3) = " << binomialCoefficient(5, 3) << endl;
+	 cout << "binomial(5,3) = " << binomialCoefficient(5, 3) << endl;
 
-	k = atoi(argv[1]);
-	q = atoi(argv[2]);
+	 k = atoi(argv[1]);
+	 q = atoi(argv[2]);
 
-	cout << "Test case 1 - given result: " << testThresholdOneShape1()
-			<< " expected result: 1" << endl;
-	cout << "Test case 2 - given result: " << testThresholdOneShape2()
-			<< " expected result: 2" << endl;
+	 cout << "Test case 1 - given result: " << testThresholdOneShape1()
+	 << " expected result: 1" << endl;
+	 cout << "Test case 2 - given result: " << testThresholdOneShape2()
+	 << " expected result: 2" << endl;
 
-	cout << "k=" << k << " q=" << q << endl;
+	 cout << "k=" << k << " q=" << q << endl;
 
-	testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
+	 testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
+	 */
 
-	std::string stringManuela;
-	std::getline(std::cin, stringManuela);
-
-	*/
+	 std::string stringManuela;
+	 std::getline(std::cin, stringManuela);
 
 	return 0;
 }
@@ -145,34 +144,26 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 		toBinary(counter, binary, s - 1);
 		arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
 		/*
-		result = min(
-				findThreshold(s, k, arrayQ, arrayQLen, arrayM, arrayMLen, m, k),
-				result);
-				*/
+		 result = min(
+		 findThreshold(s, k, arrayQ, arrayQLen, arrayM, arrayMLen, m, k),
+		 result);
+		 */
 	}
 	return result;
 }
 
-void findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
-		int j, int** tresholds, int lenTreshold, long long int offset) {
+void setThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
+		int j, int** tresholds, long long int lenTreshold, long long int offset) {
 
-	//lenTresholds je duljina prve dimenzije, duljina druge dimenzije zapisana na indexu 0
-	// u svakom malom polju druge dim
+	bool* binaryM = new bool[s - 1];
+	toBinary(M, lenM, binaryM, s - 1);
+	int idx1 = fromBinary(binaryM, s - 1) - offset;
+	int idx2 = k - j + 1;
 
-	//ova fja zapravo zapisuje treshold u polje, ne vraæa ništa
-
-	//zapis na poziciju tresholds[prvi index][drugi index] :
-	bool* binaryM;
-	toBinary(M, lenM, binaryM, s-1);
-	int idx1 = fromBinary(binaryM, s-1) - offset;
-	int idx2 = k-j+1;
-
-	
 	if (i < s) {
 		tresholds[idx1][idx2] = 0;
+		return;
 	}
-
-	/**OSTAJE ISTO**/
 
 	/*	generate next Ms */
 	int* nextM1 = new int[lenM + 1];
@@ -219,13 +210,15 @@ void findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	if (!contains)
 		nextJ--;
 
-	tresholds[idx1][idx2] = min(getTresholdFor(s, k, nextJ, nextM1, lenNextM1, tresholds, lenTreshold)
-		+ (isSubset ? 1 : 0),
-		getTresholdFor(s, k, nextJ, nextM2, lenNextM2, tresholds, lenTreshold));
+	tresholds[idx1][idx2] = min(
+			getTresholdFor(s, k, offset, nextJ, nextM1, lenNextM1, tresholds,
+					lenTreshold) + (isSubset ? 1 : 0),
+			getTresholdFor(s, k, offset, nextJ, nextM2, lenNextM2, tresholds,
+					lenTreshold));
 }
 
-int getTresholdFor(int s, int k, int offset, int j, int* M, int lenM, int** tresholds,
-		int lenTresholds) {
+int getTresholdFor(int s, int k, int offset, int j, int* M, int lenM,
+		int** tresholds, int lenTresholds) {
 
 	if (!(j >= 0 && j <= k)) {
 		return MAX_INT;
@@ -240,9 +233,9 @@ int getTresholdFor(int s, int k, int offset, int j, int* M, int lenM, int** tres
 		return MAX_INT;
 	}
 
-	bool* mBinary = new bool[s-1];
-	toBinary(M, lenM, mBinary, s-1);
-	long long int indexM = fromBinary(mBinary, s-1) - offset;
+	bool* mBinary = new bool[s - 1];
+	toBinary(M, lenM, mBinary, s - 1);
+	long long int indexM = fromBinary(mBinary, s - 1) - offset;
 	int indexJ = k - j + 1;
 
 	return tresholds[indexM][indexJ];
@@ -313,10 +306,10 @@ long long int fromBinary(bool* array, int count) {
 }
 
 void toBinary(int* M, int lenM, bool* binary, int size) {
-	for(int i = 0; i < size; i++){
+	for (int i = 0; i < size; i++) {
 		binary[i] = false;
 	}
-	for(int i = 0; i < lenM; i++) {
+	for (int i = 0; i < lenM; i++) {
 		binary[M[i] - 1] = true;
 	}
 }
