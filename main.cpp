@@ -27,8 +27,13 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 /*	*/
 int toBinary(long long int value, bool* array, int size);
 
+/* */
+long long int fromBinary(bool* array, int count);
+
 /*	*/
 int fillFromBinary(bool* binary, int start, int end, int* arrayM, int offset);
+
+long long int binomialCoefficient(int m, int n);
 
 /*
  Tests
@@ -39,22 +44,39 @@ void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k);
 
 int main(int argc, char** argv) {
 
-	std::cout << "Hello World!" << std::endl;
+	/*  Argumenti: m, k, s, q */
+
+	int m = 13;
+	int k = 2;
+	int s = 4;
+	int q = 3;
+
+	long long int tresholdsArrayLength = 0;
+	for(int j = 0; j <= k; j++) {
+		tresholdsArrayLength += binomialCoefficient(s - 1, j);
+	}
+	cout << "array length = " << tresholdsArrayLength << endl;
+
+	long long int offset = pow(2, s - 1) - tresholdsArrayLength;
+	cout << "offset = " << offset << endl;
+
+	cout << "binomial(5,3) = " << binomialCoefficient(5, 3) << endl;
+
+	k = atoi(argv[1]);
+	q = atoi(argv[2]);
 
 	cout << "Test case 1 - given result: " << testThresholdOneShape1()
 			<< " expected result: 1" << endl;
 	cout << "Test case 2 - given result: " << testThresholdOneShape2()
 			<< " expected result: 2" << endl;
 
-	int k = atoi(argv[1]);
-	int q = atoi(argv[2]);
-
 	cout << "k=" << k << " q=" << q << endl;
 
 	testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
 
-	std::string s;
-	std::getline(std::cin, s);
+	std::string stringManuela;
+	std::getline(std::cin, stringManuela);
+
 	return 0;
 }
 
@@ -89,31 +111,6 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 				result);
 	}
 	return result;
-}
-
-/*
- Generate list of shapes...
- */
-int** generateShapes(int s, int q, int* shapesLen) {
-	int start = 1;
-	int end = s - 2;
-	int len = end - start + 1;
-	long long int countTo = pow(2, len);
-	int** shapes = new int*[countTo];
-	*shapesLen = 0;
-	bool* array = new bool[len];
-	for (long long int counter = 0; counter < countTo; counter++) {
-		int onesCount = toBinary(counter, array, len);
-		if (onesCount == (q - 2)) {
-			int* arrayQ = new int[q];
-			fillFromBinary(array, start, end, arrayQ, 1);
-			arrayQ[0] = 0;
-			arrayQ[q - 1] = s - 1;
-			shapes[*shapesLen] = arrayQ;
-			*shapesLen = *shapesLen + 1;
-		}
-	}
-	return shapes;
 }
 
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
@@ -192,6 +189,31 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 }
 
 /*
+ Generate list of shapes...
+ */
+int** generateShapes(int s, int q, int* shapesLen) {
+	int start = 1;
+	int end = s - 2;
+	int len = end - start + 1;
+	long long int countTo = pow(2, len);
+	int** shapes = new int*[countTo];
+	*shapesLen = 0;
+	bool* array = new bool[len];
+	for (long long int counter = 0; counter < countTo; counter++) {
+		int onesCount = toBinary(counter, array, len);
+		if (onesCount == (q - 2)) {
+			int* arrayQ = new int[q];
+			fillFromBinary(array, start, end, arrayQ, 1);
+			arrayQ[0] = 0;
+			arrayQ[q - 1] = s - 1;
+			shapes[*shapesLen] = arrayQ;
+			*shapesLen = *shapesLen + 1;
+		}
+	}
+	return shapes;
+}
+
+/*
  Fill arrayM array with numbers from start to end where is one in binary.
  Like there is an array of [start, start + 1, ..., end - 1, end] and in arrayM
  are copied values on indexes where is one in binary array.
@@ -218,6 +240,28 @@ int toBinary(long long int value, bool* array, int size) {
 		counter += array[size - i - 1] = value & (1 << i);
 	}
 	return counter;
+}
+
+long long int fromBinary(bool* array, int count)
+{
+	long long int ret = 0;
+	int tmp;
+	for (int i = 0; i < count; i++) {
+		tmp = array[i];
+		ret |= tmp << (count - i - 1);
+	}
+	return ret;
+}
+
+long long int binomialCoefficient(int m, int n) {
+	long long int result = 1;
+	for(int i = m; i > m - n; i--) {
+		result *= i;
+	}
+	for(int i = 2; i <= n; i++) {
+		result /= i;
+	}
+	return result;
 }
 
 /*	======================== TESTS ========================= */
