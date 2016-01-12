@@ -95,6 +95,20 @@ int calculateThreshold(int s, int k, int m, int q, int* result) {
 
 int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 		int arrayQLen) {
+
+	//NE SLIJEPO VJEROVATI
+	//za i = s do m:
+	//		treba proæ po polju thresholds
+	//		za svaku poziciju izraèunati M, j:
+					//M = (index + offset) -> toBinary -> fillBinary
+					//j = k - index
+	//		treshold = pozvati findTreshold s tim M i j
+	// 		zapisati taj treshold na tu pozciju
+
+	//sada na kraju treba proæi cijelo polje (ovu prvu dim) i sa indeksa 0 u polju druge dim
+	//proèitati vrijednost praga i od svih njih treba uzeti min
+
+
 	int* arrayM = new int[s - 1];
 	int arrayMLen = 0;
 
@@ -128,6 +142,8 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	if (lenM < (s - 1 - j)) {
 		return MAX_INT;
 	}
+
+	//
 	if (i < s) {
 		return 0;
 	}
