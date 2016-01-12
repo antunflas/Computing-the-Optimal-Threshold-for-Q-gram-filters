@@ -24,6 +24,9 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 		int j);
 
+int getTresholdFor(int s, int k, int j, int* M, int lenM, int** tresholds,
+		int lenTresholds);
+
 /*	*/
 int toBinary(long long int value, bool* array, int size);
 
@@ -242,7 +245,7 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	return result;
 }
 
-int getTresholdFor(int s, int k, int j, int* M, int lenM, int** tresholds,
+int getTresholdFor(int s, int k, int offset, int j, int* M, int lenM, int** tresholds,
 		int lenTresholds) {
 
 	if (!(j >= 0 && j <= k)) {
@@ -260,13 +263,10 @@ int getTresholdFor(int s, int k, int j, int* M, int lenM, int** tresholds,
 
 	bool* mBinary = new bool[s-1];
 	toBinary(M, lenM, mBinary, s-1);
+	long long int indexM = fromBinary(mBinary, s-1) - offset;
+	int indexJ = k - j + 1;
 
-	//zapis na poziciju tresholds[prvi index][drugi index] :
-	//prvi index: (M -> dekadski) - offset
-	//drugi index: (k - j + 1)
-
-
-
+	return tresholds[indexM][indexJ];
 }
 
 /*
