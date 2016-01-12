@@ -81,6 +81,7 @@ int main(int argc, char** argv) {
 }
 
 int calculateThreshold(int s, int k, int m, int q, int* result) {
+
 	int shapesLen = 0;
 	int** shapes = generateShapes(s, q, &shapesLen);
 	int threshold = 0;
@@ -107,7 +108,8 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 	//		treshold = pozvati findTreshold s tim M i j
 	// 		zapisati taj treshold na tu pozciju
 
-	//sada na kraju treba proæi cijelo polje (ovu prvu dim) i sa indeksa 0 u polju druge dim
+	//sada na kraju treba proæi cijelo polje (ovu prvu dim) i sa indeksa 1 (
+	//na prvom je duljina) u polju druge dim
 	//proèitati vrijednost praga i od svih njih treba uzeti min
 
 
@@ -128,27 +130,25 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 }
 
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
-		int j) {
+		int j, int** tresholds, int lenTreshold) {
 
-	/*	check constraints */
+	//lenTresholds je duljina prve dimenzije, duljina druge dimenzije zapisana na indexu 0
+	// u svakom malom polju druge dim
 
-	if (!(j >= 0 && j <= k)) {
-		return MAX_INT;
-	}
-	for (int c = 0; c < lenM; c++) {
-		if (!(M[c] >= 1 && M[c] <= (s - 1))) {
-			return MAX_INT;
-		}
-	}
-
-	if (lenM < (s - 1 - j)) {
-		return MAX_INT;
-	}
+	//ova fja zapravo zapisuje treshold u polje, ne vraæa ništa
+	//zapis na poziciju tresholds[prvi index][drugi index] :
+		//prvi index: (M -> dekadski) - offset
+		//drugi index: (k - j)
 
 	//
 	if (i < s) {
+
+		//zapisi 0
+
 		return 0;
 	}
+
+	/**OSTAJE ISTO**/
 
 	/*	generate next Ms */
 	int* nextM1 = new int[lenM + 1];
@@ -195,13 +195,42 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	if (!contains)
 		nextJ--;
 
+
+	/** KRAJ OSTAJE ISTO**/
+
+	//result = min (getTresholdFor(s, k, nextJ, nextM1, lenNextM1, tresholds, lenTresholds)
+	//				+ (isSubset ? 1 : 0),
+	//				getTresholdFor(s, k, nextJ, nextM2, lenNextM2, tresholds, lenTresholds));
+	//
+
+	/** NE TREBA **/
 	int result = min(
 			findThreshold(s, k, Q, lenQ, nextM1, lenNextM1, i - 1, nextJ)
 					+ (isSubset ? 1 : 0),
 			findThreshold(s, k, Q, lenQ, nextM2, lenNextM2, i - 1, nextJ));
+
+	/** KRAJ NE TREBA **/
 	free(nextM1);
 	free(nextM2);
 	return result;
+}
+
+
+int getTresholdFor(int s, int k, int j, int* M, int lenM, int** tresholds, int lenTresholds) {
+	if (!(j >= 0 && j <= k)) {
+			return MAX_INT;
+		}
+		for (int c = 0; c < lenM; c++) {
+			if (!(M[c] >= 1 && M[c] <= (s - 1))) {
+				return MAX_INT;
+			}
+		}
+
+		if (lenM < (s - 1 - j)) {
+			return MAX_INT;
+		}
+
+
 }
 
 /*
