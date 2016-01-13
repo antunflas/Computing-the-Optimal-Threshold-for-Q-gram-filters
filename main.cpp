@@ -118,20 +118,32 @@ int calculateThreshold(int s, int k, int m, int q, int* result) {
 	vector<int*> shapes = generateShapes(s, q);
 	cout << "SHAPES LEN: " << shapesLen << endl;
 	int threshold = 0;
-	long long int thresholdArrayLength = calculateThresholdArrayLength(k, s);
+
 	cout << "tu" << endl;
 
 	unordered_map<string, int*> tresholdsMap;
-
-	//int** thresholds = new int*[thresholdArrayLength];
-
-	cout << "created with " << thresholdArrayLength << endl;
-	//int** copy = new int*[thresholdArrayLength];
 	unordered_map<string, int*> copy;
+
+	int* arrayM = new int[s - 1];
+	int arrayMLen = 0;
+
+	long long int limit = pow(2, s - 1);
 	bool* binary = new bool[s - 1];
-	long long int offset = pow(2, s - 1) - thresholdArrayLength;
-	for (long long int index = 0; index < thresholdArrayLength; index++) {
-		int ones = toBinary(index + offset, binary, s - 1);
+
+	for (long long int counter = 0; counter < limit; counter++) {
+		int ones = toBinary(counter, binary, s - 1);
+		if(ones < s - 1 - k) {
+			continue;
+		}
+		arrayMLen = 0;
+		//cout << "M = ";
+		for (int c = 0; c < (s - 1); c++) {
+			if (binary[c] == 1) {
+				arrayM[arrayMLen++] = c + 1;
+				//cout << (c + 1);
+			}
+		}
+
 		int* arrayJ = new int[ones + 1];
 		arrayJ[0] = ones;
 
@@ -146,8 +158,9 @@ int calculateThreshold(int s, int k, int m, int q, int* result) {
 		pair<string, int*> mypair(key, arrayJ);
 		copy.insert(copyPair);
 		tresholdsMap.insert(mypair);
-		//thresholds[index] = arrayJ;
 	}
+
+	//////////////////////////////
 
 	for (unsigned int i = 0; i < shapes.size(); i++) {
 		int* shape = shapes[i];
@@ -217,6 +230,7 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
 		int arrayQLen, unordered_map<string, int*> thresholds,
 		unordered_map<string, int*> copy) {
+
 	int* arrayM = new int[s - 1];
 	int arrayMLen = 0;
 	bool* binary = new bool[s - 1];
@@ -279,14 +293,14 @@ int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
 		}
 	}
 	/*
-	for (long long int index = 0; index < thresholdLen; index++) {
-		for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
-			if (result > thresholds[index][j]) {
-				result = thresholds[index][j];
-			}
-		}
-	}
-	*/
+	 for (long long int index = 0; index < thresholdLen; index++) {
+	 for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
+	 if (result > thresholds[index][j]) {
+	 result = thresholds[index][j];
+	 }
+	 }
+	 }
+	 */
 	free(arrayM);
 	delete[] binary;
 	return result;
@@ -448,7 +462,7 @@ int toBinary(long long int value, bool* array, int size) {
 
 string binaryToString(bool* binary, int size) {
 	string str;
-	for(int i = 0; i < size; i++) {
+	for (int i = 0; i < size; i++) {
 		str += binary[i];
 	}
 	return str;
