@@ -77,45 +77,26 @@ int main(int argc, char** argv) {
 
 	/*  Argumenti: m, k, s, q */
 
-	int m = 13;
-	int k = 2;
-	int s = 4;
-	int q = 3;
+	if (argc == 3) {
+		int k = atoi(argv[1]);
+		int q = atoi(argv[2]);
+		testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
+	} else if (argc == 5) {
+		int m = atoi(argv[1]);
+		int k = atoi(argv[2]);
+		int q = atoi(argv[3]);
+		int s = atoi(argv[4]);
 
-
-	int thresholdsArrayLength = calculateThresholdArrayLength(k, s);
-
-	long long int tresholdsArrayLength = 0;
-	for (int j = 0; j <= k; j++) {
-		tresholdsArrayLength += binomialCoefficient(s - 1, j);
 	}
-
-	long long int offset = pow(2, s - 1) - tresholdsArrayLength;
-
-	//if (argc >= 3) {
-	//	k = atoi(argv[1]);
-	//	q = atoi(argv[2]);
-	//}
-
-	if (argc >= 3) {
-		k = atoi(argv[1]);
-		q = atoi(argv[2]);
-	}
-
-	k = atoi(argv[1]);
-	q = atoi(argv[2]);
-
-	//cout << "Test case 1 - given result: " << testThresholdOneShape1()
-	//		<< " expected result: 1" << endl;
-	//cout << "Test case 2 - given result: " << testThresholdOneShape2()
-	//		<< " expected result: 2" << endl;
-
-	//testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
 
 	std::string stringManuela;
 	std::getline(std::cin, stringManuela);
 
 	return 0;
+}
+
+void printShape(int* shape, int q) {
+	string str;
 }
 
 long long int calculateThresholdArrayLength(int k, int s) {
@@ -128,15 +109,10 @@ long long int calculateThresholdArrayLength(int k, int s) {
 
 int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 
-	int shapesLen = 0;
-
 	vector<int*> shapes;
 
 	unordered_map<string, int*> tresholdsMap;
 	unordered_map<string, int*> copy;
-
-	int* arrayM = new int[s - 1];
-	int arrayMLen = 0;
 
 	long long int limit = pow(2, s - 1);
 	bool* binary = new bool[s - 1];
@@ -146,8 +122,6 @@ int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 		if (ones < s - 1 - k) {
 			continue;
 		}
-
-		arrayMLen = 0;
 
 		int* arrayJ = new int[1 + k - (s - 1 - ones) + 1];
 		arrayJ[0] = k - (s - 1 - ones) + 1;
@@ -200,14 +174,13 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 		int arrayQLen) {
 
 	int* arrayM = new int[s - 1];
-	int arrayMLen = 0;
 
 	long long int limit = pow(2, s - 1);
 	bool* binary = new bool[s - 1];
 	int result = MAX_INT;
 	for (long long int counter = 0; counter < limit; counter++) {
 		toBinary(counter, binary, s - 1);
-		arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
+		fillFromBinary(binary, 1, s - 1, arrayM, 0);
 	}
 	return result;
 }
@@ -503,7 +476,7 @@ string binaryToString(bool* binary, int size) {
 }
 
 bool* stringToBinary(string str, bool* binary, int size) {
-	for (int i = 0; i < str.length(); i++) {
+	for (unsigned int i = 0; i < str.length(); i++) {
 		if (str[i] == '1') {
 			binary[i] = true;
 		} else {
