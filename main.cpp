@@ -83,20 +83,20 @@ int main(int argc, char** argv) {
 
 	long long int offset = pow(2, s - 1) - tresholdsArrayLength;
 
-	//if (argc >= 3) {
-	//	k = atoi(argv[1]);
-	//	q = atoi(argv[2]);
-	//}
+	if (argc >= 3) {
+		k = atoi(argv[1]);
+		q = atoi(argv[2]);
+	}
 
-	//k = atoi(argv[1]);
-	//q = atoi(argv[2]);
+	k = atoi(argv[1]);
+	q = atoi(argv[2]);
 
 	//cout << "Test case 1 - given result: " << testThresholdOneShape1()
 	//		<< " expected result: 1" << endl;
 	//cout << "Test case 2 - given result: " << testThresholdOneShape2()
 	//		<< " expected result: 2" << endl;
 
-	testThresholdForAllShapesWithSomeQAndKVariableS(2, 4);
+	testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
 
 	//cout << calculateThreshold(7, 4, 50, 2, new int[1]) << endl;
 
@@ -125,12 +125,14 @@ int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 	//cout << "tu" << endl;
 
 	vector<int*> shapes;
-	if (q < 4 || newShape)
-		shapes = generateShapes(s, q);
-	else {
-		//cout << "ELSE" << endl;
-		shapes = nextShapes(s, s, k, m, q, result);
-	}
+	//shapes = generateShapes(s, q);
+	shapes = generateShapes(s, q);
+	//if (q < 4 || newShape)
+	//	shapes = generateShapes(s, q);
+	//else {
+	//	//cout << "ELSE" << endl;
+	//	shapes = nextShapes(s, s, k, m, q, result);
+	//}
 
 	int threshold = 0;
 
@@ -480,9 +482,16 @@ vector<int*> nextShapes(int shapesLen, int s, int k, int m, int q,
 //samo pozitivni
 	vector<int*> shapesQS = generateShapes(s, q);
 	vector<int*> shapePositive;
+
+	vector<int*> result;
+
 	for (int i = 0; i < shapesQS.size(); i++) {
 		if (calculateThreshold(s, k, m, q, result_, true) > 0) {
 			shapePositive.push_back(shapesQS[i]);
+		}
+		else
+		{
+			return result;
 		}
 
 		//shapePositive.push_back(shapesQS[i]);
@@ -523,7 +532,7 @@ vector<int*> nextShapes(int shapesLen, int s, int k, int m, int q,
 
 	} while (!endShapes);
 
-	vector<int*> result;
+	
 	for (int i = 0; i < shapeSets.size(); i++) {
 		int* temp = new int[shapesLen + 1];
 
