@@ -173,11 +173,12 @@ int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 	}
 
 	shapes = nextShapes(s, q, k, m, tresholdsMap, copy);
+	cout << "Završio" << endl;
 
 	int threshold = 0;
 
 	//////////////////////////////
-	//cout << "Postavljam sve nule" << endl;
+	cout << "Broj dohvacenih shapeova = " << shapes.size() << endl;
 
 	for (unsigned int i = 0, shapeLen = shapes.size(); i < shapeLen; i++) {
 		for (auto iterator = tresholdsMap.begin();
@@ -320,6 +321,17 @@ int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
 	return result;
 }
 /*	check constraints */
+long long int binomialCoefficient(int m, int n) {
+	long long int result = 1;
+	for (int i = m; i > m - n; i--) {
+		result *= i;
+	}
+	for (int i = 2; i <= n; i++) {
+		result /= i;
+	}
+	return result;
+}
+
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 		int j, unordered_map<string, int*>& tresholds, bool* binaryM) {
 
@@ -460,8 +472,9 @@ vector<int*> nextShapes(int s, int q, int k, int m, unordered_map<string, int*>&
 	}
 
 	vector<int*> shapesQS = nextShapes(s, q - 1, k, m, tresholdsMap, copy);
-	vector<int*> shapePositive;
 
+
+	vector<int*> shapePositive;
 	for (unsigned int i = 0; i < shapesQS.size(); i++) {
 		for (auto iterator = tresholdsMap.begin();
 				iterator != tresholdsMap.end(); iterator++) {
@@ -472,6 +485,7 @@ vector<int*> nextShapes(int s, int q, int k, int m, unordered_map<string, int*>&
 				copyValue[j] = 0;
 			}
 		}
+
 		if (myCalculateThresholdForShape(s, k, m, shapesQS[i], q - 1,
 				tresholdsMap, copy) > 0) {
 			shapePositive.push_back(shapesQS[i]);
@@ -619,17 +633,6 @@ void toBinary(int* M, int lenM, bool* binary, int size) {
 	for (int i = 0; i < lenM; i++) {
 		binary[M[i] - 1] = true;
 	}
-}
-
-long long int binomialCoefficient(int m, int n) {
-	long long int result = 1;
-	for (int i = m; i > m - n; i--) {
-		result *= i;
-	}
-	for (int i = 2; i <= n; i++) {
-		result /= i;
-	}
-	return result;
 }
 
 /*	======================== TESTS ========================= */
