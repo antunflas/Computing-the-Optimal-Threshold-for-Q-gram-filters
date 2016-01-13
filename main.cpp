@@ -22,8 +22,7 @@ vector<int*> generateShapes(int s, int q);
 
 bool AreShapesEqual(int* a, int* b, int start, int end);
 
-vector<int*> nextShapes(int shapesLen, int s, int k, int m, int q,
-		int* result_);
+vector<int*> nextShapes(int s, int q, int k, int m);
 
 /*  raèuna threshold za odreðeni Q */
 int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
@@ -74,7 +73,10 @@ int main(int argc, char** argv) {
 	int s = 4;
 	int q = 3;
 
+	nextShapes(6, 5, 5, 50);
+
 	/*
+
 	int thresholdsArrayLength = calculateThresholdArrayLength(k, s);
 
 	long long int tresholdsArrayLength = 0;
@@ -89,6 +91,11 @@ int main(int argc, char** argv) {
 	//	q = atoi(argv[2]);
 	//}
 
+	if (argc >= 3) {
+		k = atoi(argv[1]);
+		q = atoi(argv[2]);
+	}
+
 	k = atoi(argv[1]);
 	q = atoi(argv[2]);
 
@@ -97,12 +104,14 @@ int main(int argc, char** argv) {
 	//cout << "Test case 2 - given result: " << testThresholdOneShape2()
 	//		<< " expected result: 2" << endl;
 
-	testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
+	//testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
 
 	//cout << calculateThreshold(7, 4, 50, 2, new int[1]) << endl;
 
 	std::string stringManuela;
 	std::getline(std::cin, stringManuela);
+
+
 
 	return 0;
 }
@@ -126,15 +135,8 @@ int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 	//cout << "tu" << endl;
 
 	vector<int*> shapes;
-	/*
-	if (q < 4 || newShape) {
-		shapes = generateShapes(s, q);
-	} else {
-		//cout << "ELSE" << endl;
-		shapes = nextShapes(s, s, k, m, q, result);
-	}
-	*/
-	shapes = generateShapes(s, q);
+
+	shapes = nextShapes(s, q, k, m);
 
 	int threshold = 0;
 
@@ -160,19 +162,7 @@ int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 		 cout << endl;
 		 */
 		arrayMLen = 0;
-		/*
-		 cout << "M = ";
-		 =======
-		 >>>>>>> 70a282c06bcd471d56ed292d59670e8c41ac4a99
-		 for (int c = 0; c < (s - 1); c++) {
-		 if (binary[c] == 1) {
-		 arrayM[arrayMLen++] = c + 1;
-		 }
-		 }
 
-		 <<<<<<< HEAD
-		 cout << endl;
-		 */
 		int* arrayJ = new int[1 + k - (s - 1 - ones) + 1];
 		arrayJ[0] = k - (s - 1 - ones) + 1;
 
@@ -464,84 +454,89 @@ vector<int*> generateShapes(int s, int q) {
 
 bool AreShapesEqual(int* a, int* b, int start, int end) {
 	for (int i = start; i < end; i++) {
-		if (a[i] != b[i])
+		if (a[i] != b[i]) {
 			return false;
+		}
 	}
 	return true;
 }
 
-vector<int*> nextShapes(int shapesLen, int s, int k, int m, int q,
-		int* result_) {
-// 1. svi (q-1,s) shapeovi koji imaju pozitivan treshold
-// 2. podijeliti shapeove u skupine tako da se razlikuju samo na predzadnjoj poziciji
-// 3. za takve skupove generirati uniju tih skupova koja je sada novi shape
+vector<int*> nextShapes(int s, int q, int k, int m) {
 
-	int start = 1;
-	int end = s - 2;
-	int len = end - start + 1;
-	long long int countTo = pow(2, len);
-
-//samo pozitivni
-	vector<int*> shapesQS = generateShapes(s, q);
-	vector<int*> shapePositive;
-	for (int i = 0; i < shapesQS.size(); i++) {
-		if (calculateThreshold(s, k, m, q, result_, true) > 0) {
-			shapePositive.push_back(shapesQS[i]);
-		}
-
-		//shapePositive.push_back(shapesQS[i]);
+	if (q < 4) {
+		return generateShapes(s, q);
 	}
 
+	//svishapeovi = nextShape(g - 1, s, m, k)
+	//pozitivniShapeovi = new vector;
+	//for shape : svishapeovi:
+	//prag = izraèunaj prag findTresholdForShape(shape)
+	//dodaj pozitivan
+
+	// 1. svi (q-1,s) shapeovi koji imaju pozitivan treshold
+	// 2. podijeliti shapeove u skupine tako da se razlikuju samo na predzadnjoj poziciji
+	// 3. za takve skupove generirati uniju tih skupova koja je sada novi shape
+	//uniju dodati u konacne shapeove
+	//vrati konacne shape
+
+	//samo pozitivni
+	vector<int*> shapesQS = nextShapes(s, q - 1, k, m);
+	vector<int*> shapePositive;
+	cout << "1"<< endl;
+	for (unsigned int i = 0; i < shapesQS.size(); i++) {
+		if (calculateThresholdForShape(s, k, m, shapesQS[i], q - 1) > 0) {
+			shapePositive.push_back(shapesQS[i]);
+		}
+	}
+	cout << "2"<< endl;
 	vector<vector<int*>> shapeSets;
 
-	// pozitivne grupirati 
+	cout << "1"<< endl;
 
-	bool endShapes = false;
-	do {
+	while (shapePositive.size() > 0) {
 		vector<int> indexes;
 		vector<int*> tempSet;
-		int i = 0;
-		tempSet.push_back(shapePositive[i]);
-		indexes.push_back(i);
-		for (int j = i + 1; j < shapePositive.size(); j++) {
-			int a = shapePositive[i][shapesLen - 2];
-			int b = shapePositive[j][shapesLen - 2];
-			if ((a != shapePositive[j][shapesLen - 2])
-					&& AreShapesEqual(shapePositive[i], shapePositive[j], 1,
-							shapesLen - 2))	// provjeri  2,3,...,shapesLen - 3
-									{
+		tempSet.push_back(shapePositive[0]);
+		indexes.push_back(0);
+		for (unsigned int j = shapePositive.size() - 1; j > 0; j--) {
+			if ((shapePositive[0][q - 2] != shapePositive[j][q - 2])
+					&& AreShapesEqual(shapePositive[0], shapePositive[j], 1,
+							q - 2)) {
 				tempSet.push_back(shapePositive[j]);
-				indexes.push_back(j);
+				shapePositive.erase(shapePositive.begin() + j);
 			}
 		}
-
 		shapeSets.push_back(tempSet);
+	}
 
-		// briše sve za koje su naðeni isti
-		for (int j = 0; j < indexes.size(); j++) {
-			shapePositive.erase(shapePositive.begin() + indexes[j] - j);//-1 možda?
+	for(int i = 0; i < shapeSets.size(); i++) {
+		cout << "Grupa " << i << endl;
+		for(int j = 0; j < shapeSets[i].size(); j++) {
+
+			for(int k = 0; k < q - 1; k++) {
+				cout << shapeSets[i][j][k] << " ";
+			}
+			cout << endl;
 		}
-
-		if (shapePositive.size() == 0)
-			endShapes = true;
-
-	} while (!endShapes);
+	}
 
 	vector<int*> result;
-	for (int i = 0; i < shapeSets.size(); i++) {
-		int* temp = new int[shapesLen + 1];
+	/*
+	for (unsigned int i = 0; i < shapeSets.size(); i++) {
+		int* temp = new int[s + 1];
 
-		for (int j = 0; j < shapeSets[i].size(); j++) {
+		for (unsigned int j = 0; j < shapeSets[i].size(); j++) {
 			int x = 0;
-			for (x; x < shapesLen; x++) {
+			for (x; x < s; x++) {
 				temp[x] = shapeSets[i][0][x];	// all elements from
 			}
 			for (int z = j + 1; z < shapeSets[i].size(); z++) {
-				temp[x] = shapeSets[i][z][shapesLen - 2]; // i predzadnji element
+				temp[x] = shapeSets[i][z][s - 2]; // i predzadnji element
 			}
 			result.push_back(temp);
 		}
 	}
+	*/
 	return result;
 }
 
