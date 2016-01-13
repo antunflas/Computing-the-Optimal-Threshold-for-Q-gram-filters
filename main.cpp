@@ -13,7 +13,7 @@ static const int MAX_INT = std::numeric_limits<int>::max();
 static vector<int*> empty_vector;
 
 /*  poèetna funkcija koju zovemo iz maina */
-int calculateThreshold(int s, int k, int m, int q, int* result);
+int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape);
 
 /*  generira sve Q koje treba ispitati
  kasnije bi možda bilo pametno ovo preoblikovati tako da izraèuna koji su pozitivni thresholdi pa vrati samo te Q.
@@ -111,12 +111,12 @@ long long int calculateThresholdArrayLength(int k, int s) {
 	return thresholdsArrayLength;
 }
 
-int calculateThreshold(int s, int k, int m, int q, int* result) {
+int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 
 	int shapesLen = 0;
 
 	vector<int*> shapes;
-	if (q<4)
+	if (q<4 || newShape)
 		shapes = generateShapes(s, q);
 	else
 	{
@@ -405,12 +405,12 @@ vector<int*> nextShapes(int shapesLen, int s, int k, int m, int q, int* result_)
 	vector<int*> shapePositive;
 	for (int i = 0; i < shapesQS.size(); i++)
 	{
-		/*if (calculateThreshold(s, k, m, q, result_) >0)
+		if (calculateThreshold(s, k, m, q, result_, true) >0)
 		{
 			shapePositive.push_back(shapesQS[i]);
-		}*/
+		}
 
-		shapePositive.push_back(shapesQS[i]);
+		//shapePositive.push_back(shapesQS[i]);
 	}
 
 	vector<vector<int*>> shapeSets;
@@ -676,10 +676,10 @@ int* arrayForQ(int q, int k) {
 void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k) {
 	int* result =  new int[1];
 	int* array = arrayForQ(q, k);
-	q = 4;
+	q = 8;
 	k = 4;
 	for (int s = q; s <= (50 - k); s++) {
-		int value = calculateThreshold(s, k, 50, q, result);
+		int value = calculateThreshold(s, k, 50, q, result, false);
 		bool sat = array[s - q] == value;
 		cout << "s: " << s << " threshold: " << value << " satisfied: " << sat
 				<< endl;
