@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 using namespace std;
 
@@ -23,16 +24,15 @@ vector<int*> generateShapes(int s, int q);
 int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
 
 int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
-		int arrayQLen, int** thresholds, long long int offset,
-		long long int thresholdLen, int** copy);
+		int arrayQLen, unordered_map<string, int*> thresholds,
+		unordered_map<string, int*> copy);
 
 /*  ona rekurzivna funkcija */
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
-		int j, int** tresholds, long long int lenTreshold,
-		long long int offset, bool* binary);
+		int j, unordered_map<string, int*> tresholds, bool* binary);
 
-int getTresholdFor(int s, int k, int offset, int j, int* M, int lenM,
-		int** tresholds, int lenTresholds, bool* binary);
+int getTresholdFor(int s, int k, int j, int* M, int lenM,
+		unordered_map<string, int*> tresholds, bool* binary);
 
 /*	*/
 int toBinary(long long int value, bool* array, int size);
@@ -49,6 +49,8 @@ long long int binomialCoefficient(int m, int n);
 
 long long int calculateThresholdArrayLength(int k, int s);
 
+string binaryToString(bool* binary, int size);
+
 /*
  Tests
  */
@@ -60,7 +62,6 @@ int main(int argc, char** argv) {
 
 	/*  Argumenti: m, k, s, q */
 
-
 	int m = 13;
 	int k = 2;
 	int s = 4;
@@ -68,20 +69,6 @@ int main(int argc, char** argv) {
 
 	int thresholdsArrayLength = calculateThresholdArrayLength(k, s);
 	cout << "array length = " << thresholdsArrayLength << endl;
-
-	int* probaM = new int[3] { 2, 3, 5 };
-	for (int i = 0; i < 3; i++) {
-		cout << probaM[i];
-	}
-	cout << endl;
-
-	bool* binaryM = new bool[3];
-	toBinary(probaM, 3, binaryM, 5);
-
-	for (int i = 0; i < 5; i++) {
-		cout << binaryM[i];
-	}
-	cout << endl;
 
 	long long int tresholdsArrayLength = 0;
 	for (int j = 0; j <= k; j++) {
@@ -108,7 +95,6 @@ int main(int argc, char** argv) {
 
 	cout << "k=" << k << " q=" << q << endl;
 
-
 	testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
 
 	std::string stringManuela;
@@ -134,42 +120,55 @@ int calculateThreshold(int s, int k, int m, int q, int* result) {
 	int threshold = 0;
 	long long int thresholdArrayLength = calculateThresholdArrayLength(k, s);
 	cout << "tu" << endl;
-	int** thresholds = new int*[thresholdArrayLength];
+
+	unordered_map<string, int*> tresholdsMap;
+
+	//int** thresholds = new int*[thresholdArrayLength];
+
 	cout << "created with " << thresholdArrayLength << endl;
-	int** copy = new int*[thresholdArrayLength];
+	//int** copy = new int*[thresholdArrayLength];
+	unordered_map<string, int*> copy;
 	bool* binary = new bool[s - 1];
 	long long int offset = pow(2, s - 1) - thresholdArrayLength;
 	for (long long int index = 0; index < thresholdArrayLength; index++) {
 		int ones = toBinary(index + offset, binary, s - 1);
 		int* arrayJ = new int[ones + 1];
 		arrayJ[0] = ones;
-		copy[index] = new int[ones + 1];
-		copy[index][0] = ones;
+
+		int* copyValue = new int[ones + 1];
+		copyValue[0] = ones;
 		for (int j = 1, jLen = ones + 1; j < jLen; j++) {
 			arrayJ[j] = 0;
-			copy[index][j] = 0;
+			copyValue[j] = 0;
 		}
-		thresholds[index] = arrayJ;
+		string key = binaryToString(binary, s - 1);
+		pair<string, int*> copyPair(key, copyValue);
+		pair<string, int*> mypair(key, arrayJ);
+		copy.insert(copyPair);
+		tresholdsMap.insert(mypair);
+		//thresholds[index] = arrayJ;
 	}
 
 	for (unsigned int i = 0; i < shapes.size(); i++) {
 		int* shape = shapes[i];
-		int value = myCalculateThresholdForShape(s, k, m, shape, q, thresholds,
-				offset, thresholdArrayLength, copy);
+		int value = myCalculateThresholdForShape(s, k, m, shape, q,
+				tresholdsMap, copy);
 		if (threshold < value) {
 			threshold = value;
 			result = shape;
 		}
 	}
-	cout << "Deleting" << endl;
-	for (long long int index = 0; index < thresholdArrayLength; index++) {
-		delete[] thresholds[index];
-		delete[] copy[index];
-	}
-	cout << "Deleted 2d" << endl;
-	delete[] thresholds;
-	cout << "Deleted threshold" << endl;
-	delete[] copy;
+	/*
+	 cout << "Deleting" << endl;
+	 for (long long int index = 0; index < thresholdArrayLength; index++) {
+	 delete[] thresholds[index];
+	 delete[] copy[index];
+	 }
+	 cout << "Deleted 2d" << endl;
+	 delete[] thresholds;
+	 cout << "Deleted threshold" << endl;
+	 delete[] copy;
+	 */
 	cout << "Deleted copy" << endl;
 	cout << "Deleted 2d shapes" << endl;
 	shapes.clear();
@@ -216,28 +215,70 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 }
 
 int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
-		int arrayQLen, int** thresholds, long long int offset,
-		long long int thresholdLen, int** copy) {
+		int arrayQLen, unordered_map<string, int*> thresholds,
+		unordered_map<string, int*> copy) {
 	int* arrayM = new int[s - 1];
 	int arrayMLen = 0;
 	bool* binary = new bool[s - 1];
 
+	/*
+	 for (int i = s; i <= m; i++) {
+	 for (long long int index = 0; index < thresholdLen; index++) {
+	 toBinary(index + offset, binary, s - 1);
+	 arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
+	 for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
+	 copy[index][j] = findThreshold(s, k, arrayQ, arrayQLen, arrayM,
+	 arrayMLen, i, k - j + 1, thresholds, thresholdLen,
+	 offset, binary);
+	 }
+	 }
+	 for (long long int index = 0; index < thresholdLen; index++) {
+	 for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
+	 thresholds[index][j] = copy[index][j];
+	 }
+	 }
+	 }
+
+	 */
+
+	//
 	for (int i = s; i <= m; i++) {
-		for (long long int index = 0; index < thresholdLen; index++) {
-			toBinary(index + offset, binary, s - 1);
+		for (auto iterator = thresholds.begin(); iterator != thresholds.end();
+				iterator++) {
 			arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
-			for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
-				copy[index][j] = findThreshold(s, k, arrayQ, arrayQLen, arrayM,
-						arrayMLen, i, k - j + 1, thresholds, thresholdLen, offset, binary);
+			int* copyValue = copy.find(iterator->first)->second;
+			int* thresholdsValue = iterator->second;
+			for (int j = 1, jLen = thresholdsValue[0] + 1; j < jLen; j++) {
+
+				copyValue[j] = findThreshold(s, k, arrayQ, arrayQLen, arrayM,
+						arrayMLen, i, k - j + 1, thresholds, binary);
 			}
 		}
-		for (long long int index = 0; index < thresholdLen; index++) {
-			for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
-				thresholds[index][j] = copy[index][j];
+		for (auto iterator = thresholds.begin(); iterator != thresholds.end();
+				iterator++) {
+
+			int* copyValue = copy.find(iterator->first)->second;
+			int* thresholdValue = iterator->second;
+			for (int j = 1, jLen = thresholdValue[0] + 1; j < jLen; j++) {
+				thresholdValue[j] = copyValue[j];
 			}
 		}
 	}
+
 	int result = MAX_INT;
+
+	for (auto iterator = thresholds.begin(); iterator != thresholds.end();
+			iterator++) {
+
+		int* copyValue = copy.find(iterator->first)->second;
+		int* thresholdValue = iterator->second;
+		for (int j = 1, jLen = thresholdValue[0] + 1; j < jLen; j++) {
+			if (result > thresholdValue[j]) {
+				result = thresholdValue[j];
+			}
+		}
+	}
+	/*
 	for (long long int index = 0; index < thresholdLen; index++) {
 		for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
 			if (result > thresholds[index][j]) {
@@ -245,6 +286,7 @@ int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
 			}
 		}
 	}
+	*/
 	free(arrayM);
 	delete[] binary;
 	return result;
@@ -265,8 +307,7 @@ int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
 }
 /*	check constraints */
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
-		int j, int** tresholds, long long int lenTreshold,
-		long long int offset, bool* binaryM) {
+		int j, unordered_map<string, int*> tresholds, bool* binaryM) {
 
 	if (!(j >= 0 && j <= k)) {
 		return MAX_INT;
@@ -327,14 +368,13 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 		nextJ--;
 
 	return min(
-			getTresholdFor(s, k, offset, nextJ, nextM1, lenNextM1, tresholds,
-					lenTreshold, binaryM) + (isSubset ? 1 : 0),
-			getTresholdFor(s, k, offset, nextJ, nextM2, lenNextM2, tresholds,
-					lenTreshold, binaryM));
+			getTresholdFor(s, k, nextJ, nextM1, lenNextM1, tresholds, binaryM)
+					+ (isSubset ? 1 : 0),
+			getTresholdFor(s, k, nextJ, nextM2, lenNextM2, tresholds, binaryM));
 }
 
-int getTresholdFor(int s, int k, int offset, int j, int* M, int lenM,
-		int** tresholds, int lenTresholds, bool* mBinary) {
+int getTresholdFor(int s, int k, int j, int* M, int lenM,
+		unordered_map<string, int*> tresholds, bool* mBinary) {
 
 	if (!(j >= 0 && j <= k)) {
 		return MAX_INT;
@@ -350,10 +390,8 @@ int getTresholdFor(int s, int k, int offset, int j, int* M, int lenM,
 	}
 
 	toBinary(M, lenM, mBinary, s - 1);
-	long long int indexM = fromBinary(mBinary, s - 1) - offset;
 	int indexJ = k - j + 1;
-
-	return tresholds[indexM][indexJ];
+	return tresholds.find(binaryToString(mBinary, s - 1))->second[indexJ];
 }
 
 /*
@@ -406,6 +444,14 @@ int toBinary(long long int value, bool* array, int size) {
 		counter += array[size - i - 1] = value & (1 << i);
 	}
 	return counter;
+}
+
+string binaryToString(bool* binary, int size) {
+	string str;
+	for(int i = 0; i < size; i++) {
+		str += binary[i];
+	}
+	return str;
 }
 
 long long int fromBinary(bool* array, int count) {
