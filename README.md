@@ -16,8 +16,9 @@ _____.exe k q
 
 Example
 For: 
-_____.exe m k q s   
+_____.exe m k q s
 output is: xxxxxxxxxxxxxxxxxxxxxxxx
+
 For:
 _____.exe k q
 output is: xxxxxxxxxxxxxxxxxxxxxxxx
