@@ -20,6 +20,10 @@ int calculateThreshold(int s, int k, int m, int q, int* result);
  */
 vector<int*> generateShapes(int s, int q);
 
+bool AreShapesEqual(int* a, int* b, int start, int end);
+
+vector<int*> nextShapes(int s, int q, int shapesLen);
+
 /*  raèuna threshold za odreðeni Q */
 int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
 
@@ -431,6 +435,99 @@ vector<int*> generateShapes(int s, int q) {
 	return shapes;
 }
 
+bool AreShapesEqual(int* a, int* b, int start, int end)
+{
+	for (int i = start; i < end; i++)
+	{
+		if (a[i] != b[i])
+			return false;
+	}
+	return true;
+}
+
+
+vector<int*> nextShapes(int s, int q, int shapesLen)
+{
+	// 1. svi (q-1,s) shapeovi koji imaju pozitivan treshold
+	// 2. podijeliti shapeove u skupine tako da se razlikuju samo na predzadnjoj poziciji
+	// 3. za takve skupove generirati uniju tih skupova koja je sada novi shape
+
+	int start = 1;
+	int end = s - 2;
+	int len = end - start + 1;
+	long long int countTo = pow(2, len);
+
+	//samo pozitivni
+	vector<int*> shapePositive;
+	for (int i = 0; i < countTo; i++)
+	{
+		//if (izracunaj_treshold>0)
+		//{
+		//shapePositive.push_back(shapesQS[i]);
+		//}
+	}
+
+	vector<vector<int*>> shapeSets;
+
+	// pozitivne grupirati 
+
+	bool endShapes = false;
+	do
+	{
+		vector<int> indexes;
+		vector<int* > tempSet;
+		int i = 0;
+		tempSet.push_back(shapePositive[i]);
+		indexes.push_back(i);
+		for (int j = i + 1; j < shapePositive.size(); j++)
+		{
+			int a = shapePositive[i][shapesLen - 2];
+			int b = shapePositive[j][shapesLen - 2];
+			if ((a != shapePositive[j][shapesLen - 2]) &&
+				AreShapesEqual(shapePositive[i], shapePositive[j], 1, shapesLen - 2))	// provjeri  2,3,...,shapesLen - 3
+			{
+				tempSet.push_back(shapePositive[j]);
+				indexes.push_back(j);
+			}
+		}
+
+		shapeSets.push_back(tempSet);
+
+		// briše sve za koje su naðeni isti
+		for (int j = 0; j < indexes.size(); j++)
+		{
+			shapePositive.erase(shapePositive.begin() + indexes[j] - j);	//-1 možda?
+		}
+
+		if (shapePositive.size() == 0)
+			endShapes = true;
+
+	} while (!endShapes);
+
+
+	vector<int*> result;
+	for (int i = 0; i < shapeSets.size(); i++)
+	{
+		int* temp = new int[shapesLen + 1];
+
+		for (int j = 0; j < shapeSets[i].size(); j++)
+		{
+			for (int z = j + 1; z < shapeSets[i].size(); z++)
+			{
+				int x = 0;
+				for (x; x < shapesLen; x++)
+				{
+					temp[x] = shapeSets[i][0][x];	// all elements from 
+				}
+
+				temp[x] = shapeSets[i][z][shapesLen - 2]; // i predzadnji element
+				result.push_back(temp);
+			}
+		}
+	}
+	return result;
+}
+
 /*
  Fill arrayM array with numbers from start to end where is one in binary.
  Like there is an array of [start, start + 1, ..., end - 1, end] and in arrayM
@@ -619,7 +716,7 @@ int* arrayForQ(int q, int k) {
 }
 
 void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k) {
-	int* result;
+	int* result =  new int[1];
 	int* array = arrayForQ(q, k);
 	for (int s = q; s <= (50 - k); s++) {
 		int value = calculateThreshold(s, k, 50, q, result);
