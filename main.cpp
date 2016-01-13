@@ -22,7 +22,7 @@ vector<int*> generateShapes(int s, int q);
 
 bool AreShapesEqual(int* a, int* b, int start, int end);
 
-vector<int*> nextShapes(int s, int q, int shapesLen);
+vector<int*> nextShapes(int shapesLen, int s, int k, int m, int q, int* result_);
 
 /*  raèuna threshold za odreðeni Q */
 int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
@@ -74,34 +74,28 @@ int main(int argc, char** argv) {
 	int q = 3;
 
 	int thresholdsArrayLength = calculateThresholdArrayLength(k, s);
-	//cout << "array length = " << thresholdsArrayLength << endl;
 
 	long long int tresholdsArrayLength = 0;
 	for (int j = 0; j <= k; j++) {
 		tresholdsArrayLength += binomialCoefficient(s - 1, j);
 	}
-	//cout << "array length = " << tresholdsArrayLength << endl;
 
 	long long int offset = pow(2, s - 1) - tresholdsArrayLength;
-	//cout << "offset = " << offset << endl;
 
-	if (argc >= 3) {
-		k = atoi(argv[1]);
-		q = atoi(argv[2]);
-	}
-	//cout << "binomial(5,3) = " << binomialCoefficient(5, 3) << endl;
+	//if (argc >= 3) {
+	//	k = atoi(argv[1]);
+	//	q = atoi(argv[2]);
+	//}
 
-	k = atoi(argv[1]);
-	q = atoi(argv[2]);
+	//k = atoi(argv[1]);
+	//q = atoi(argv[2]);
 
 	//cout << "Test case 1 - given result: " << testThresholdOneShape1()
 	//		<< " expected result: 1" << endl;
 	//cout << "Test case 2 - given result: " << testThresholdOneShape2()
 	//		<< " expected result: 2" << endl;
 
-	cout << "k=" << k << " q=" << q << endl;
-
-	testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
+	testThresholdForAllShapesWithSomeQAndKVariableS(2, 4);
 
 	std::string stringManuela;
 	std::getline(std::cin, stringManuela);
@@ -120,12 +114,19 @@ long long int calculateThresholdArrayLength(int k, int s) {
 int calculateThreshold(int s, int k, int m, int q, int* result) {
 
 	int shapesLen = 0;
-	cout << "generating" << endl;
-	vector<int*> shapes = generateShapes(s, q);
-	cout << "SHAPES LEN: " << shapesLen << endl;
-	int threshold = 0;
 
-	cout << "tu" << endl;
+	vector<int*> shapes;
+	if (q<4)
+		shapes = generateShapes(s, q);
+	else
+	{
+		//cout << "ELSE" << endl;
+		shapes = nextShapes(s, s, k, m, q, result);
+	}
+		
+
+
+	int threshold = 0;
 
 	unordered_map<string, int*> tresholdsMap;
 	unordered_map<string, int*> copy;
@@ -142,22 +143,18 @@ int calculateThreshold(int s, int k, int m, int q, int* result) {
 			continue;
 		}
 		arrayMLen = 0;
-		cout << "M = ";
 		for (int c = 0; c < (s - 1); c++) {
 			if (binary[c] == 1) {
 				arrayM[arrayMLen++] = c + 1;
-				cout << (c + 1);
 			}
 		}
 
-		cout << endl;
+		int* arrayJ = new int[1+k-(s-1-ones)+1];
+		arrayJ[0] = k - (s - 1 - ones) + 1;
 
-		int* arrayJ = new int[ones + 1];
-		arrayJ[0] = ones;
-
-		int* copyValue = new int[ones + 1];
-		copyValue[0] = ones;
-		for (int j = 1, jLen = ones + 1; j < jLen; j++) {
+		int* copyValue = new int[1 + k - (s - 1 - ones) + 1];
+		copyValue[0] = k - (s - 1 - ones) + 1;
+		for (int j = 1, jLen = copyValue[0]; j < jLen; j++) {
 			arrayJ[j] = 0;
 			copyValue[j] = 0;
 		}
@@ -190,43 +187,14 @@ int calculateThreshold(int s, int k, int m, int q, int* result) {
 			result = shape;
 		}
 	}
-	/*
-	 cout << "Deleting" << endl;
-	 for (long long int index = 0; index < thresholdArrayLength; index++) {
-	 delete[] thresholds[index];
-	 delete[] copy[index];
-	 }
-	 cout << "Deleted 2d" << endl;
-	 delete[] thresholds;
-	 cout << "Deleted threshold" << endl;
-	 delete[] copy;
-	 */
-	cout << "Deleted copy" << endl;
-	cout << "Deleted 2d shapes" << endl;
 	shapes.clear();
 	shapes.swap(empty_vector);
-	cout << "Deleted shapes" << endl;
 	delete[] binary;
-	cout << "Deleted all" << endl;
-	cout << "Free finish" << endl;
 	return threshold;
 }
 
 int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 		int arrayQLen) {
-
-	//NE SLIJEPO VJEROVATI
-	//za i = s do m:
-	//		treba proæ po polju thresholds
-	//		za svaku poziciju izraèunati M, j:
-	//M = (index + offset) -> toBinary -> fillBinary
-	//j = k - index
-	//		treshold = pozvati findTreshold s tim M i j
-	// 		zapisati taj treshold na tu pozciju
-
-	//sada na kraju treba proæi cijelo polje (ovu prvu dim) i sa indeksa 1 (
-	//na prvom je duljina) u polju druge dim
-	//proèitati vrijednost praga i od svih njih treba uzeti min
 
 	int* arrayM = new int[s - 1];
 	int arrayMLen = 0;
@@ -237,11 +205,6 @@ int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
 	for (long long int counter = 0; counter < limit; counter++) {
 		toBinary(counter, binary, s - 1);
 		arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
-		/*
-		 result = min(
-		 findThreshold(s, k, arrayQ, arrayQLen, arrayM, arrayMLen, m, k),
-		 result);
-		 */
 	}
 	return result;
 }
@@ -254,57 +217,16 @@ int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
 	int arrayMLen = 0;
 	bool* binary = new bool[s - 1];
 
-	/*
-	 for (int i = s; i <= m; i++) {
-	 for (long long int index = 0; index < thresholdLen; index++) {
-	 toBinary(index + offset, binary, s - 1);
-	 arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
-	 for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
-	 copy[index][j] = findThreshold(s, k, arrayQ, arrayQLen, arrayM,
-	 arrayMLen, i, k - j + 1, thresholds, thresholdLen,
-	 offset, binary);
-	 }
-	 }
-	 for (long long int index = 0; index < thresholdLen; index++) {
-	 for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
-	 thresholds[index][j] = copy[index][j];
-	 }
-	 }
-	 }
-
-	 */
-
-	//
 	for (int i = s; i <= m; i++) {
 		for (auto iterator = thresholds.begin(); iterator != thresholds.end();
 				iterator++) {
 
 			string key = iterator->first;
-			cout << "Ispisujem" << endl;
 
-			for (int i = 0; i < key.size(); i++) {
-				cout << key[i];
-			}
-			cout << endl;
-
-			//pretvoriti
 			bool* bin = stringToBinary(iterator->first, binary, s - 1);
-			/*
-			 cout << "Bin=";
-			 for (int i = 0; i < (s - 1); i++) {
-			 cout << bin[i] << " ";
-			 }
 
-			 cout << endl;
-			 */
 			arrayMLen = fillFromBinary(bin, 1, s - 1, arrayM, 0);
-			/*
-			 cout << "array M (" << arrayMLen << ") ";
-			 for (int z = 0; z < arrayMLen; z++) {
-			 cout << arrayM[z] << " ";
-			 }
-			 cout << endl;
-			 */
+
 			int* copyValue = copy.find(iterator->first)->second;
 			int* thresholdsValue = iterator->second;
 
@@ -337,39 +259,16 @@ int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
 			}
 		}
 	}
-	/*
-	 for (long long int index = 0; index < thresholdLen; index++) {
-	 for (int j = 1, jLen = thresholds[index][0] + 1; j < jLen; j++) {
-	 if (result > thresholds[index][j]) {
-	 result = thresholds[index][j];
-	 }
-	 }
-	 }
-	 */
+
 	free(arrayM);
+	
 	delete[] binary;
 	return result;
-
-	/*
-	 long long int limit = pow(2, s - 1);
-
-	 int result = MAX_INT;
-	 for (long long int counter = 0; counter < limit; counter++) {
-	 toBinary(counter, binary, s - 1);
-	 arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
-	 result = min(
-	 findThreshold(s, k, arrayQ, arrayQLen, arrayM, arrayMLen, m, k),
-	 result);
-	 }
-	 return result;
-	 */
 }
 /*	check constraints */
 int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 		int j, unordered_map<string, int*> tresholds, bool* binaryM) {
 
-	cout << "FIND TRESHOLD" << endl;
-	cout << "j=" << j << " lenM=" << lenM;
 
 	if (!(j >= 0 && j <= k)) {
 		return MAX_INT;
@@ -383,8 +282,6 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 	if (lenM < (s - 1 - j)) {
 		return MAX_INT;
 	}
-
-	cout << "Prošao validaciju.." << endl;
 
 	/*	generate next Ms */
 	int* nextM1 = new int[lenM + 1];
@@ -492,7 +389,7 @@ bool AreShapesEqual(int* a, int* b, int start, int end)
 }
 
 
-vector<int*> nextShapes(int s, int q, int shapesLen)
+vector<int*> nextShapes(int shapesLen, int s, int k, int m, int q, int* result_)
 {
 	// 1. svi (q-1,s) shapeovi koji imaju pozitivan treshold
 	// 2. podijeliti shapeove u skupine tako da se razlikuju samo na predzadnjoj poziciji
@@ -504,13 +401,16 @@ vector<int*> nextShapes(int s, int q, int shapesLen)
 	long long int countTo = pow(2, len);
 
 	//samo pozitivni
+	vector<int*> shapesQS = generateShapes(s, q);
 	vector<int*> shapePositive;
-	for (int i = 0; i < countTo; i++)
+	for (int i = 0; i < shapesQS.size(); i++)
 	{
-		//if (izracunaj_treshold>0)
-		//{
-		//shapePositive.push_back(shapesQS[i]);
-		//}
+		/*if (calculateThreshold(s, k, m, q, result_) >0)
+		{
+			shapePositive.push_back(shapesQS[i]);
+		}*/
+
+		shapePositive.push_back(shapesQS[i]);
 	}
 
 	vector<vector<int*>> shapeSets;
@@ -558,17 +458,16 @@ vector<int*> nextShapes(int s, int q, int shapesLen)
 
 		for (int j = 0; j < shapeSets[i].size(); j++)
 		{
+			int x = 0;
+			for (x; x < shapesLen; x++)
+			{
+				temp[x] = shapeSets[i][0][x];	// all elements from 
+			}
 			for (int z = j + 1; z < shapeSets[i].size(); z++)
 			{
-				int x = 0;
-				for (x; x < shapesLen; x++)
-				{
-					temp[x] = shapeSets[i][0][x];	// all elements from 
-				}
-
 				temp[x] = shapeSets[i][z][shapesLen - 2]; // i predzadnji element
-				result.push_back(temp);
 			}
+			result.push_back(temp);
 		}
 	}
 	return result;
@@ -605,6 +504,7 @@ int toBinary(long long int value, bool* array, int size) {
 
 string binaryToString(bool* binary, int size) {
 	string str;
+	str.reserve(size+1);
 	for (int i = 0; i < size; i++) {
 		str += (binary[i] ? '1' : '0');
 	}
@@ -776,11 +676,12 @@ int* arrayForQ(int q, int k) {
 void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k) {
 	int* result =  new int[1];
 	int* array = arrayForQ(q, k);
+	q = 4;
+	k = 4;
 	for (int s = q; s <= (50 - k); s++) {
 		int value = calculateThreshold(s, k, 50, q, result);
 		bool sat = array[s - q] == value;
 		cout << "s: " << s << " threshold: " << value << " satisfied: " << sat
 				<< endl;
-		return;
 	}
 }
