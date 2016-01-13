@@ -51,6 +51,8 @@ long long int calculateThresholdArrayLength(int k, int s);
 
 string binaryToString(bool* binary, int size);
 
+bool* stringToBinary(string str, bool* binary, int size);
+
 /*
  Tests
  */
@@ -132,7 +134,7 @@ int calculateThreshold(int s, int k, int m, int q, int* result) {
 
 	for (long long int counter = 0; counter < limit; counter++) {
 		int ones = toBinary(counter, binary, s - 1);
-		if(ones < s - 1 - k) {
+		if (ones < s - 1 - k) {
 			continue;
 		}
 		arrayMLen = 0;
@@ -259,7 +261,10 @@ int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
 	for (int i = s; i <= m; i++) {
 		for (auto iterator = thresholds.begin(); iterator != thresholds.end();
 				iterator++) {
-			arrayMLen = fillFromBinary(binary, 1, s - 1, arrayM, 0);
+			//pretvoriti
+			arrayMLen = fillFromBinary(
+					stringToBinary(iterator->first, binary, s - 1), 1, s - 1,
+					arrayM, 0);
 			int* copyValue = copy.find(iterator->first)->second;
 			int* thresholdsValue = iterator->second;
 			for (int j = 1, jLen = thresholdsValue[0] + 1; j < jLen; j++) {
@@ -466,6 +471,18 @@ string binaryToString(bool* binary, int size) {
 		str += binary[i];
 	}
 	return str;
+}
+
+bool* stringToBinary(string str, bool* binary, int size) {
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] == '1') {
+			binary[i] = true;
+		} else {
+			binary[i] = false;
+		}
+	}
+
+	return binary;
 }
 
 long long int fromBinary(bool* array, int count) {
