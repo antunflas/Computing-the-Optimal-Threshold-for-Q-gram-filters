@@ -175,7 +175,8 @@ int calculateThreshold(int s, int k, int m, int q, int* result) {
 		for (auto iterator = tresholdsMap.begin();
 				iterator != tresholdsMap.end(); iterator++) {
 			int* copyValue = copy.find(iterator->first)->second;
-			for (int j = 1, jLen = tresholdsMap[0] + 1; j < jLen; j++) {
+			int* thresholdValue = iterator->second;
+			for (int j = 1, jLen = thresholdValue[0] + 1; j < jLen; j++) {
 				iterator->second[j] = 0;
 				copyValue[j] = 0;
 			}
@@ -436,7 +437,7 @@ int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
 			getTresholdFor(s, k, nextJ, nextM2, lenNextM2, tresholds, binaryM));
 }
 
-int getTresholdFor(int i, int s, int k, int j, int* M, int lenM,
+int getTresholdFor(int s, int k, int j, int* M, int lenM,
 		unordered_map<string, int*> tresholds, bool* mBinary) {
 
 	if (!(j >= 0 && j <= k)) {
