@@ -86,10 +86,10 @@ int main(int argc, char** argv) {
 
 	long long int offset = pow(2, s - 1) - tresholdsArrayLength;
 
-	//if (argc >= 3) {
-	//	k = atoi(argv[1]);
-	//	q = atoi(argv[2]);
-	//}
+	if (argc >= 3) {
+		k = atoi(argv[1]);
+		q = atoi(argv[2]);
+	}
 
 	k = atoi(argv[1]);
 	q = atoi(argv[2]);
@@ -130,7 +130,9 @@ int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 	//cout << "tu" << endl;
 
 	vector<int*> shapes;
+
 	shapes = nextShapes(s, q, k, m);
+
 
 	int threshold = 0;
 
@@ -513,7 +515,6 @@ vector<int*> nextShapes(int s, int q, int k, int m) {
 			cout << endl;
 		}
 	}
-
 
 	vector<int*> result;
 	/*
