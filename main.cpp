@@ -155,7 +155,7 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 		thresholds.insert(thresholds_pair);
 	}
 
-	//vector<int*> shapes = GenerateShapesFromPrevious(s, q, k, m, tresholdsMap, copy);
+	//vector<int*> shapes = GenerateShapesFromPrevious(s, q, k, m, thresholds, copy);
 	vector<int*> shapes = GenerateShapes(s, q);
 
 	int threshold = 0;
@@ -529,8 +529,9 @@ vector<int*> GenerateShapesFromPrevious(int s, int q, int k, int m,
 			}
 		}
 
-		if (CalculateThresholdForShape(s, k, m, previous_shapes[i], q - 1,
-				thresholds, copy) > 0) {
+		int value = CalculateThresholdForShape(s, k, m, previous_shapes[i], q - 1,
+				thresholds, copy);
+		if (value > 0) {
 			positive_threshold_shapes.push_back(previous_shapes[i]);
 		}
 	}
@@ -842,7 +843,10 @@ void CalculateThresholdForSpanValues(int q, int k) {
 	for (int s = q, len = 50 - k; s <= len; s++) {
 		int value = CalculateThreshold(s, k, 50, q, &result);
 		bool sat = array[s - q] == value;
-		cout << "s: " << s << " threshold: " << value << " satisfied: " << sat
-				<< endl;
+		cout << "s: " << s << " threshold: " << value << " satisfied: " << sat;
+		if (value > 0) {
+			cout << " for shape: " << ShapeToString(result, q);
+		}
+		cout << endl;
 	}
 }
