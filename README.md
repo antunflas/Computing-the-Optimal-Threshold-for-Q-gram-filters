@@ -1,21 +1,21 @@
 #Filtering with Gapped q-Grams
 
-#Synopsis
+##Synopsis
 Approximate string matching which compares q-grams (substrings of length q) and text is well-studied and very popular. However, as shown in paper written by Burkhardt S. and Kärkkäinen J. gapped q-grams can provide more efficient filtering. Main objective of this project is, based on mentioned paper, calculating filter parameter called optimal threshold. 
 
-#Motivation
+##Motivation
 Project is created as assignment within the course [Bioinformatics](https://www.fer.unizg.hr/en/course/bio) on Faculty of Electrical Engineering and Computing, University of Zagreb.
 
-## Installation
+##Installation
 Open command window inside folder and for compile write `make` or run `compile.sh`
 
-#Usage
+##Usage
 Depending on parameters sent in program different data is shown. If inputs are size of shape Q (q) and Hamming distance (k) then optimal threshold is printed for span (s) up to 45 with string length (m) of 50. Alternatively, except for q and k, it is possible to define both s and m. With these 4 parameters their optimal threshold is printed.
 
-##Run program with:
+###Run program with:
 run script `run.sh` with 2 or 4 arguments as mentioned before.
 
-##Example
+###Example
 
 Run with 4 arguments: `run.sh m k q s`
 ```
@@ -47,7 +47,7 @@ s: 8 threshold: 35 satisfied: 1
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request 
 
-#License
+##License
 
 The MIT License (MIT)
 
