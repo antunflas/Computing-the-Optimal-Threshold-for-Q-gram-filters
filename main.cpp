@@ -13,7 +13,7 @@ static const int MAX_INT = std::numeric_limits<int>::max();
 static vector<int*> empty_vector;
 
 /*  po�etna funkcija koju zovemo iz maina */
-int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape);
+int calculateThreshold(int s, int k, int m, int q, int** result);
 
 /*  generira sve Q koje treba ispitati
  kasnije bi mo�da bilo pametno ovo preoblikovati tako da izra�una koji su pozitivni thresholdi pa vrati samo te Q.
@@ -66,6 +66,8 @@ string binaryToString(bool* binary, int size);
 /**/
 bool* stringToBinary(string str, bool* binary, int size);
 
+string shapeToString(int* shape, int q);
+
 /*
  Tests
  */
@@ -86,7 +88,13 @@ int main(int argc, char** argv) {
 		int k = atoi(argv[2]);
 		int q = atoi(argv[3]);
 		int s = atoi(argv[4]);
-
+		int* result = new int[1];
+		int t = calculateThreshold(s, k, m, q, &result);
+		cout << t;
+		if (t != 0) {
+			cout << " " << shapeToString(result, q);
+		}
+		cout << endl;
 	}
 
 	std::string stringManuela;
@@ -95,8 +103,18 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
-void printShape(int* shape, int q) {
-	string str;
+string shapeToString(int* shape, int q) {
+	string str = "#";
+	int index = 1;
+	for (int counter = 1, len = shape[q - 1]; counter < len; counter++) {
+		if (shape[index] == counter) {
+			str += "#";
+			index++;
+		} else {
+			str += "-";
+		}
+	}
+	return str;
 }
 
 long long int calculateThresholdArrayLength(int k, int s) {
@@ -107,9 +125,7 @@ long long int calculateThresholdArrayLength(int k, int s) {
 	return thresholdsArrayLength;
 }
 
-int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
-
-	vector<int*> shapes;
+int calculateThreshold(int s, int k, int m, int q, int** result) {
 
 	unordered_map<string, int*> tresholdsMap;
 	unordered_map<string, int*> copy;
@@ -139,7 +155,8 @@ int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 		tresholdsMap.insert(mypair);
 	}
 
-	shapes = nextShapes(s, q, k, m, tresholdsMap, copy);
+	//vector<int*> shapes = nextShapes(s, q, k, m, tresholdsMap, copy);
+	vector<int*> shapes = generateShapes(s, q);
 
 	int threshold = 0;
 
@@ -161,7 +178,7 @@ int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 				tresholdsMap, copy);
 		if (threshold < value) {
 			threshold = value;
-			result = shape;
+			*result = shape;
 		}
 	}
 	shapes.clear();
@@ -638,8 +655,8 @@ int* arrayForQ(int q, int k) {
 void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k) {
 	int* result = new int[1];
 	int* array = arrayForQ(q, k);
-	for (int s = 20; s <= (50 - k); s++) {
-		int value = calculateThreshold(s, k, 50, q, result, false);
+	for (int s = q, len = 50 - k; s <= len; s++) {
+		int value = calculateThreshold(s, k, 50, q, &result);
 		bool sat = array[s - q] == value;
 		cout << "s: " << s << " threshold: " << value << " satisfied: " << sat
 				<< endl;
