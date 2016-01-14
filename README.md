@@ -7,10 +7,10 @@ Approximate string matching which compares q-grams (substrings of length q) and 
 Project is created as assignment within the course [Bioinformatics](https://www.fer.unizg.hr/en/course/bio) on Faculty of Electrical Engineering and Computing, University of Zagreb.
 
 ##Installation
-Open command window inside folder and for compile write `make` or run `compile.sh`
+Compile the source files by running `make` or `compile.sh` from root directory of project.
 
 ##Usage
-Depending on parameters sent in program different data is shown. If inputs are size of shape Q (q) and Hamming distance (k) then optimal threshold is printed for span (s) up to 45 with string length (m) of 50. Alternatively, except for q and k, it is possible to define both s and m. With these 4 parameters their optimal threshold is printed.
+Depending on parameters sent in program different data is shown. If inputs are size of shape Q (q) and distance (k) then optimal threshold is calculated for span (s) varying from q up to 50-k with string length (m) of 50. For this option available distance (k) values are 4 and 5. Alternatively, except for q and k, it is possible to define both s and m. With these 4 parameters their optimal threshold is calculated.
 
 ###Run program with:
 run script `run.sh` with 2 or 4 arguments as mentioned before.
@@ -19,9 +19,9 @@ run script `run.sh` with 2 or 4 arguments as mentioned before.
 
 Run with 4 arguments: `run.sh m k q s`
 ```
-command: run.sh 50 5 2 2
+command: run.sh 50 5 3 5
 output: 
-39
+31	#--##
 ```
 
 Run with 2 arguments: `run.sh k q`
