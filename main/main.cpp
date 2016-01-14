@@ -193,7 +193,6 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 					iterator++) {
 		delete[] iterator->second;
 	}
-
 	thresholds.clear();
 	copy.clear();
 	return threshold;
