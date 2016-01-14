@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
  * @param m string length.
  * @param q length of shape.
  * @param result container for storing calculation result,
- * 		i.e. calculated threshold.
+ * 		i.e. shape for which threshold is calculated.
  * @return calculated threshold.
  */
 int CalculateThreshold(int s, int k, int m, int q, int** result) {
