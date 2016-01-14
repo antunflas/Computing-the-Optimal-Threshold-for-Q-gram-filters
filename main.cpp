@@ -170,16 +170,18 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 	shapes.clear();
 	shapes.swap(empty_vector);
 	delete[] binary;
+	
 	for (auto iterator = thresholds.begin(); iterator != thresholds.end();
 					iterator++) {
-		delete iterator->second;
-		thresholds.erase(iterator);
+		delete[] iterator->second;
 	}
 	for (auto iterator = copy.begin(); iterator != copy.end();
 					iterator++) {
-		delete iterator->second;
-		thresholds.erase(iterator);
+		delete[] iterator->second;
 	}
+	thresholds.clear();
+	copy.clear();
+	
 	return threshold;
 }
 
