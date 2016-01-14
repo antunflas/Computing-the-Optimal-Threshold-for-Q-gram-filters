@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 		int t = calculateThreshold(s, k, m, q, &result);
 		cout << t;
 		if (t != 0) {
-			cout << " " << shapeToString(result, q);
+			cout << "\t" << shapeToString(result, q);
 		}
 		cout << endl;
 	}
