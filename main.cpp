@@ -86,6 +86,11 @@ int main(int argc, char** argv) {
 
 	long long int offset = pow(2, s - 1) - tresholdsArrayLength;
 
+	//if (argc >= 3) {
+	//	k = atoi(argv[1]);
+	//	q = atoi(argv[2]);
+	//}
+
 	if (argc >= 3) {
 		k = atoi(argv[1]);
 		q = atoi(argv[2]);
@@ -94,7 +99,12 @@ int main(int argc, char** argv) {
 	k = atoi(argv[1]);
 	q = atoi(argv[2]);
 
-	testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
+	//cout << "Test case 1 - given result: " << testThresholdOneShape1()
+	//		<< " expected result: 1" << endl;
+	//cout << "Test case 2 - given result: " << testThresholdOneShape2()
+	//		<< " expected result: 2" << endl;
+
+	//testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
 
 	std::string stringManuela;
 	std::getline(std::cin, stringManuela);
