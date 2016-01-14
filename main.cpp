@@ -72,6 +72,10 @@ int main(int argc, char** argv) {
 	if (argc == 3) {
 		int k = atoi(argv[1]);
 		int q = atoi(argv[2]);
+		if(!(k == 4 || k == 5)) {
+			cerr << "Distance measure must be 4 or 5.";
+			exit(1);
+		}
 		CalculateThresholdForSpanValues(q, k);
 	} else if (argc == 5) {
 		int m = atoi(argv[1]);
@@ -89,6 +93,16 @@ int main(int argc, char** argv) {
 			cout << "\t" << ShapeToString(result, q);
 		}
 		cout << endl;
+	} else {
+		cerr << "Program expects 2 or 4 arguments. " << endl;
+		cerr << "For calculating threshold in general, arguments are: m k q s" << endl;
+		cerr << "\tm: string length." << endl;
+		cerr << "\tk: distance measure between pattern and string." << endl;
+		cerr << "\tq: length of shape." << endl;
+		cerr << "\ts: span of shape." << endl;
+		cerr << "For running test version for m=50 and all possible spans, arguments are: k q" << endl;
+		cerr << "\tk: distance measure between pattern and string. Valid values are 4 or 5." << endl;
+		cerr << "\tq: length of shape." << endl;
 	}
 
 	return 0;
@@ -98,7 +112,7 @@ int main(int argc, char** argv) {
  * Calculates threshold for specified s, k, m and q.
  *
  * @param s span of shape arrayQ.
- * @param k number of differences.
+ * @param k distance measure.
  * @param m string length.
  * @param q length of shape.
  * @param result container for storing calculation result,
@@ -141,7 +155,7 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 		thresholds.insert(thresholds_pair);
 	}
 
-	//vector<int*> shapes = GenerateShapesFromPrevious(s, q, k, m, tresholdsMap, copy);
+	//vector<int*> shapes = GenerateShapesFromPrevious(s, q, k, m, thresholds, copy);
 	vector<int*> shapes = GenerateShapes(s, q);
 
 	int threshold = 0;
@@ -170,7 +184,7 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 	shapes.clear();
 	shapes.swap(empty_vector);
 	delete[] binary;
-	
+
 	for (auto iterator = thresholds.begin(); iterator != thresholds.end();
 					iterator++) {
 		delete[] iterator->second;
@@ -181,7 +195,6 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 	}
 	thresholds.clear();
 	copy.clear();
-	
 	return threshold;
 }
 
@@ -189,11 +202,11 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
  * Calculates threshold for given shape and specified s, k, m and Q
  * using direct recursive formula.
  *
- * @param s span of shape arrayQ.
+ * @param s span of shape array_q.
  * @param k number of differences.
  * @param m string length.
- * @param arrayQ shape.
- * @param lenQ length of shape.
+ * @param array_q shape.
+ * @param len_q length of shape.
  * @return calculated threshold.
  */
 int CalculateThresholdForShapeRecursive(int s, int k, int m, int* array_q,
@@ -215,14 +228,11 @@ int CalculateThresholdForShapeRecursive(int s, int k, int m, int* array_q,
  * by alternating all possible combinations of matches at last s-1
  * position.
  *
- * @param s span of shape arrayQ.
- * @param k number of differences.
+ * @param s span of shape array_q.
+ * @param k distance measure.
  * @param m string length.
- * @param arrayQ specified shape.
- * @param lenQ length of shape.
- * @param lenM length of arrayM.
- * @param i current string length.
- * @param j current number of differences.
+ * @param array_q specified shape.
+ * @param len_q length of shape.
  * @thresholds current threshold values for all error values below or
  * 			equal to k, for all possible sets M describing the matches
  * 			in the last s-1 positions and for i<=m where i is current
@@ -238,7 +248,7 @@ int CalculateThresholdForShape(int s, int k, int m, int* array_q, int len_q,
 	int array_m_len = 0;
 	bool* binary = new bool[s - 1];
 
-	/*	for all lengts up to m update threshold values */
+	/*	for all lengths up to m update threshold values */
 	for (int i = s; i <= m; i++) {
 		/*	for each entry in threshold values map, update threshold value. */
 		for (auto iterator = thresholds.begin(); iterator != thresholds.end();
@@ -296,12 +306,12 @@ int CalculateThresholdForShape(int s, int k, int m, int* array_q, int len_q,
  * Finds threshold for specified s, k, Q, i, j and M by
  * using calculated thresholds for lower string length.
  *
- * @param s span of shape arrayQ.
+ * @param s span of shape array_q.
  * @param k number of differences.
- * @param arrayQ specified shape.
- * @param lenQ length of shape.
- * @param arrayM matches at last s-1 position.
- * @param lenM length of arrayM.
+ * @param array_q specified shape.
+ * @param len_q length of shape.
+ * @param array_m matches at last s-1 position.
+ * @param len_m length of array_m.
  * @param i current string length.
  * @param j current number of differences.
  * @param thresholds current threshold values for all error values below or
@@ -393,10 +403,10 @@ int FindThreshold(int s, int k, int* array_q, int len_q, int* array_m,
  * at last s-1 positions M.
  *
  * @param s span of shape.
- * @param k number of differences.
+ * @param k distance measure.
  * @param j current number of differences.
- * @param arrayM matches at last s - 1 position.
- * @param lenM length of arrayM.
+ * @param array_m matches at last s - 1 position.
+ * @param len_m length of array_m.
  * @param thresholds current threshold values for all error values below or
  * 			equal to k, for all possible sets M describing the matches
  * 			in the last s-1 positions and for i<=m where i is current
@@ -461,8 +471,10 @@ vector<int*> GenerateShapes(int s, int q) {
 /**
  * Checks whether two shapes are equal at defined positions.
  *
- * @param shape1 First shape.
- * @param shape2 Second shape.
+ * @param first_shape First shape.
+ * @param second_shape Second shape.
+ * @param start starting position.
+ * @param end terminating position.
  * @return true if shapes are equal at defined positions,
  * 		false otherwise.
  */
@@ -479,8 +491,8 @@ bool ShapesEqual(int* first_shape, int* second_shape, int start, int end) {
  * Generates (q,s)-shapes from (q-1,s)-shapes considering only those that gave
  * positive thresholds.
  *
- * @param s span of shape Q.
- * @param q size of shape Q.
+ * @param s span of shape.
+ * @param q size of shape.
  * @param k number of differences.
  * @param m string length.
  * @param thresholds current threshold values for all error values below or
@@ -516,8 +528,9 @@ vector<int*> GenerateShapesFromPrevious(int s, int q, int k, int m,
 			}
 		}
 
-		if (CalculateThresholdForShape(s, k, m, previous_shapes[i], q - 1,
-				thresholds, copy) > 0) {
+		int value = CalculateThresholdForShape(s, k, m, previous_shapes[i], q - 1,
+				thresholds, copy);
+		if (value > 0) {
 			positive_threshold_shapes.push_back(previous_shapes[i]);
 		}
 	}
@@ -576,20 +589,22 @@ vector<int*> GenerateShapesFromPrevious(int s, int q, int k, int m,
 			}
 		}
 	}
-
 	return result;
 }
 
 /**
- * Fills arrayM with numbers from start to end shifted by index of binary value.
+ * Fills array_m with numbers from start to end shifted by index of binary value.
  * Only ones in binary are considered, positions with zero value are skipped.
  * That corresponds to having an array of [start, start + 1, ..., end] and only
  * copy those values from array at positions where is one in binary.
  * Start and end are both inclusive.
  *
  * @param binary value.
- * @start first value to be set in arrayM.
- * @return length of constructed arrayM.
+ * @param start first value that could be set in array_m.
+ * @param end last value that could be set in array_m.
+ * @param array_m matches at last s - 1 position.
+ * @param offset offset applied to values.
+ * @return length of constructed array_m.
  */
 int FillFromBinary(bool* binary, int start, int end, int* array_m, int offset) {
 	int len = end - start + 1;
@@ -671,8 +686,8 @@ long long int ToDecade(bool* binary, int size) {
  * Creates binary array from set M with integer values. Values in binary are set
  * at positions defined in M decreased by 1 since minimal value defined in M is 1.
  *
- * @param arrayM matches at last s - 1 position.
- * @param lenM length of arrayM.
+ * @param array_m matches at last s - 1 position.
+ * @param len_m length of array_m.
  * @param binary array to be filled.
  * @param size size of binary.
  *
@@ -827,7 +842,10 @@ void CalculateThresholdForSpanValues(int q, int k) {
 	for (int s = q, len = 50 - k; s <= len; s++) {
 		int value = CalculateThreshold(s, k, 50, q, &result);
 		bool sat = array[s - q] == value;
-		cout << "s: " << s << " threshold: " << value << " satisfied: " << sat
-				<< endl;
+		cout << "s: " << s << " threshold: " << value << " satisfied: " << sat;
+		if (value > 0) {
+			cout << " for shape: " << ShapeToString(result, q);
+		}
+		cout << endl;
 	}
 }
