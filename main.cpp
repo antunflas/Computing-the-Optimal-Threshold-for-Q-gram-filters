@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 		int t = calculateThreshold(s, k, m, q, &result);
 		cout << t;
 		if (t != 0) {
-			cout << " " << shapeToString(result, q);
+			cout << "\t" << shapeToString(result, q);
 		}
 		cout << endl;
 	}
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 string shapeToString(int* shape, int q) {
 	string str = "#";
 	int index = 1;
-	for (int counter = 1, len = shape[q - 1]; counter < len; counter++) {
+	for (int counter = 1, len = shape[q - 1]; counter <= len; counter++) {
 		if (shape[index] == counter) {
 			str += "#";
 			index++;
