@@ -9,159 +9,160 @@
 
 using namespace std;
 
+/**
+ * Maximum integer value.
+ */
 static const int MAX_INT = std::numeric_limits<int>::max();
+/**
+ * Empty vector used for releasing vector memory.
+ */
 static vector<int*> empty_vector;
 
-/*  po�etna funkcija koju zovemo iz maina */
-int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape);
+int CalculateThreshold(int s, int k, int m, int q, int** result);
 
-/*  generira sve Q koje treba ispitati
- kasnije bi mo�da bilo pametno ovo preoblikovati tako da izra�una koji su pozitivni thresholdi pa vrati samo te Q.
- */
-vector<int*> generateShapes(int s, int q);
+int CalculateThresholdForShapeRecursive(int s, int k, int m, int* array_q,
+		int len_q);
 
-/**/
-bool AreShapesEqual(int* a, int* b, int start, int end);
-
-/**/
-vector<int*> nextShapes(int s, int q, int k, int m, unordered_map<string, int*>& tresholdsMap,
+int CalculateThresholdForShape(int s, int k, int m, int* array_q, int len_q,
+		unordered_map<string, int*>& thresholds,
 		unordered_map<string, int*>& copy);
 
-/*  ra�una threshold za odre�eni Q */
-int calculateThresholdForShape(int s, int k, int m, int* arrayQ, int arrayQLen);
+int FindThreshold(int s, int k, int* array_q, int len_q, int* array_m,
+		int len_m, int i, int j, unordered_map<string, int*>& thresholds,
+		bool* binary);
 
-/**/
-int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
-		int arrayQLen, unordered_map<string, int*>& thresholds,
+int GetThresholdFor(int s, int k, int j, int* array_m, int len_m,
+		unordered_map<string, int*>& thresholds, bool* binary);
+
+vector<int*> GenerateShapes(int s, int q);
+
+vector<int*> GenerateShapesFromPrevious(int s, int q, int k, int m,
+		unordered_map<string, int*>& thresholds,
 		unordered_map<string, int*>& copy);
 
-/*  ona rekurzivna funkcija */
-int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
-		int j, unordered_map<string, int*>& tresholds, bool* binary);
-/**/
-int getTresholdFor(int s, int k, int j, int* M, int lenM,
-		unordered_map<string, int*>& tresholds, bool* binary);
+bool ShapesEqual(int* first_shape, int* second_shape, int start, int end);
 
-/*	*/
-int toBinary(long long int value, bool* array, int size);
+int ToBinary(long long int value, bool* array, int size);
 
-/**/
-void toBinary(int* M, int lenM, bool* binary, int size);
+void ToBinary(int* array_m, int len_m, bool* binary, int size);
 
-/* */
-long long int fromBinary(bool* array, int count);
+long long int ToDecade(bool* binary, int size);
 
-/*	*/
-int fillFromBinary(bool* binary, int start, int end, int* arrayM, int offset);
+int FillFromBinary(bool* binary, int start, int end, int* array_m, int offset);
 
-/**/
-long long int binomialCoefficient(int m, int n);
+string BinaryToString(bool* binary, int size);
 
-/**/
-long long int calculateThresholdArrayLength(int k, int s);
+void StringToBinary(string str, bool* binary, int size);
 
-/**/
-string binaryToString(bool* binary, int size);
+string ShapeToString(int* shape, int q);
 
-/**/
-bool* stringToBinary(string str, bool* binary, int size);
+void CalculateThresholdForSpanValues(int q, int k);
 
-/*
- Tests
+int* ArrayForQ(int q, int k);
+
+/**
+ * Program starting point.
+ *
+ * @param argc number of input arguments.
+ * @param argv input arguments array.
+ * @return exit code.
  */
-int testThresholdOneShape1();
-int testThresholdOneShape2();
-void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k);
-
 int main(int argc, char** argv) {
-
-	/*  Argumenti: m, k, s, q */
 
 	if (argc == 3) {
 		int k = atoi(argv[1]);
 		int q = atoi(argv[2]);
-		testThresholdForAllShapesWithSomeQAndKVariableS(q, k);
+		CalculateThresholdForSpanValues(q, k);
 	} else if (argc == 5) {
 		int m = atoi(argv[1]);
 		int k = atoi(argv[2]);
 		int q = atoi(argv[3]);
 		int s = atoi(argv[4]);
-
+		if (s < q) {
+			cerr << "Span must be greater or equal to shape length.";
+			exit(1);
+		}
+		int* result = new int[1];
+		int t = CalculateThreshold(s, k, m, q, &result);
+		cout << t;
+		if (t != 0) {
+			cout << "\t" << ShapeToString(result, q);
+		}
+		cout << endl;
 	}
-
-	std::string stringManuela;
-	std::getline(std::cin, stringManuela);
 
 	return 0;
 }
 
-void printShape(int* shape, int q) {
-	string str;
-}
-
-long long int calculateThresholdArrayLength(int k, int s) {
-	long long int thresholdsArrayLength = 0;
-	for (int j = 0; j <= k; j++) {
-		thresholdsArrayLength += binomialCoefficient(s - 1, j);
-	}
-	return thresholdsArrayLength;
-}
-
-int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
-
-	vector<int*> shapes;
-
-	unordered_map<string, int*> tresholdsMap;
+/**
+ * Calculates threshold for specified s, k, m and q.
+ *
+ * @param s span of shape arrayQ.
+ * @param k number of differences.
+ * @param m string length.
+ * @param q length of shape.
+ * @param result container for storing calculation result,
+ * 		i.e. calculated threshold.
+ * @return calculated threshold.
+ */
+int CalculateThreshold(int s, int k, int m, int q, int** result) {
+	unordered_map<string, int*> thresholds;
 	unordered_map<string, int*> copy;
 
+	/*	generate all possible sets M for j differences and use their binary representation as key in
+	 *	thresholds map */
 	long long int limit = pow(2, s - 1);
 	bool* binary = new bool[s - 1];
 
 	for (long long int counter = 0; counter < limit; counter++) {
-		int ones = toBinary(counter, binary, s - 1);
+		int ones = ToBinary(counter, binary, s - 1);
 		if (ones < s - 1 - k) {
 			continue;
 		}
 
-		int* arrayJ = new int[1 + k - (s - 1 - ones) + 1];
-		arrayJ[0] = k - (s - 1 - ones) + 1;
+		/*	value for set M is array of all number of differences for which M is
+		 * valid combination of matches at last s-1 position*/
 
-		int* copyValue = new int[1 + k - (s - 1 - ones) + 1];
-		copyValue[0] = k - (s - 1 - ones) + 1;
-		for (int j = 1, jLen = copyValue[0]; j < jLen; j++) {
-			arrayJ[j] = 0;
-			copyValue[j] = 0;
+		int* array_j = new int[1 + k - (s - 1 - ones) + 1];
+		array_j[0] = k - (s - 1 - ones) + 1;
+
+		int* copy_value = new int[1 + k - (s - 1 - ones) + 1];
+		copy_value[0] = k - (s - 1 - ones) + 1;
+		for (int j = 1, j_len = copy_value[0]; j < j_len; j++) {
+			array_j[j] = 0;
+			copy_value[j] = 0;
 		}
-		string key = binaryToString(binary, s - 1);
-		pair<string, int*> copyPair(key, copyValue);
-		pair<string, int*> mypair(key, arrayJ);
-		copy.insert(copyPair);
-		tresholdsMap.insert(mypair);
+		string key = BinaryToString(binary, s - 1);
+		pair<string, int*> copy_pair(key, copy_value);
+		pair<string, int*> thresholds_pair(key, array_j);
+		copy.insert(copy_pair);
+		thresholds.insert(thresholds_pair);
 	}
 
-	shapes = nextShapes(s, q, k, m, tresholdsMap, copy);
+	//vector<int*> shapes = nextShapes(s, q, k, m, tresholdsMap, copy);
+	vector<int*> shapes = GenerateShapes(s, q);
 
 	int threshold = 0;
 
-	//////////////////////////////
-
-	for (unsigned int i = 0, shapeLen = shapes.size(); i < shapeLen; i++) {
-		for (auto iterator = tresholdsMap.begin();
-				iterator != tresholdsMap.end(); iterator++) {
-			int* copyValue = copy.find(iterator->first)->second;
-			int* thresholdValue = iterator->second;
-			for (int j = 1, jLen = thresholdValue[0] + 1; j < jLen; j++) {
+	/*	iterate all possible shapes and calculate threshold, choose minimal out of
+	 *	all calculated values */
+	for (unsigned int i = 0, shapes_len = shapes.size(); i < shapes_len; i++) {
+		for (auto iterator = thresholds.begin(); iterator != thresholds.end();
+				iterator++) {
+			int* copy_value = copy.find(iterator->first)->second;
+			int* threshold_value = iterator->second;
+			for (int j = 1, j_len = threshold_value[0] + 1; j < j_len; j++) {
 				iterator->second[j] = 0;
-				copyValue[j] = 0;
+				copy_value[j] = 0;
 			}
 		}
 
 		int* shape = shapes[i];
-		int value = myCalculateThresholdForShape(s, k, m, shape, q,
-				tresholdsMap, copy);
+		int value = CalculateThresholdForShape(s, k, m, shape, q, thresholds,
+				copy);
 		if (threshold < value) {
 			threshold = value;
-			result = shape;
+			*result = shape;
 		}
 	}
 	shapes.clear();
@@ -170,265 +171,393 @@ int calculateThreshold(int s, int k, int m, int q, int* result, bool newShape) {
 	return threshold;
 }
 
-int calculateThresholdForShape(int s, int k, int m, int* arrayQ,
-		int arrayQLen) {
+/**
+ * Calculates threshold for given shape and specified s, k, m and Q
+ * using direct recursive formula.
+ *
+ * @param s span of shape arrayQ.
+ * @param k number of differences.
+ * @param m string length.
+ * @param arrayQ shape.
+ * @param lenQ length of shape.
+ * @return calculated threshold.
+ */
+int CalculateThresholdForShapeRecursive(int s, int k, int m, int* array_q,
+		int len_q) {
 
-	int* arrayM = new int[s - 1];
+	int* array_m = new int[s - 1];
 
 	long long int limit = pow(2, s - 1);
 	bool* binary = new bool[s - 1];
 	int result = MAX_INT;
 	for (long long int counter = 0; counter < limit; counter++) {
-		toBinary(counter, binary, s - 1);
-		fillFromBinary(binary, 1, s - 1, arrayM, 0);
+		ToBinary(counter, binary, s - 1);
+		FillFromBinary(binary, 1, s - 1, array_m, 0);
 	}
 	return result;
 }
-
-int myCalculateThresholdForShape(int s, int k, int m, int* arrayQ,
-		int arrayQLen, unordered_map<string, int*>& thresholds,
+/**
+ * Calculates threshold for given shape and specified s, k, m and Q
+ * by alternating all possible combinations of matches at last s-1
+ * position.
+ *
+ * @param s span of shape arrayQ.
+ * @param k number of differences.
+ * @param m string length.
+ * @param arrayQ specified shape.
+ * @param lenQ length of shape.
+ * @param lenM length of arrayM.
+ * @param i current string length.
+ * @param j current number of differences.
+ * @thresholds current threshold values for all error values below or
+ * 			equal to k, for all possible sets M describing the matches
+ * 			in the last s-1 positions and for i<=m where i is current
+ * 			string length.
+ * @copy copies of current threshold values.
+ * @return calculated threshold.
+ */
+int CalculateThresholdForShape(int s, int k, int m, int* array_q, int len_q,
+		unordered_map<string, int*>& thresholds,
 		unordered_map<string, int*>& copy) {
 
-	int* arrayM = new int[s - 1];
-	int arrayMLen = 0;
+	int* array_m = new int[s - 1];
+	int array_m_len = 0;
 	bool* binary = new bool[s - 1];
 
+	/*	for all lengts up to m update threshold values */
 	for (int i = s; i <= m; i++) {
+		/*	for each entry in threshold values map, update threshold value. */
 		for (auto iterator = thresholds.begin(); iterator != thresholds.end();
 				iterator++) {
 
+			/*	convert key which is string representation of M to array of integers. */
 			string key = iterator->first;
-			bool* bin = stringToBinary(iterator->first, binary, s - 1);
+			StringToBinary(iterator->first, binary, s - 1);
 
-			arrayMLen = fillFromBinary(bin, 1, s - 1, arrayM, 0);
+			array_m_len = FillFromBinary(binary, 1, s - 1, array_m, 0);
 
-			int* copyValue = copy.find(iterator->first)->second;
-			int* thresholdsValue = iterator->second;
+			/**	calculate threshold and temporarily save result to copy. */
+			int* copy_value = copy.find(iterator->first)->second;
+			int* thresholds_value = iterator->second;
 
-			for (int j = 1, jLen = thresholdsValue[0] + 1; j < jLen; j++) {
+			for (int j = 1, j_len = thresholds_value[0] + 1; j < j_len; j++) {
 
-				copyValue[j] = findThreshold(s, k, arrayQ, arrayQLen, arrayM,
-						arrayMLen, i, k - j + 1, thresholds, binary);
+				copy_value[j] = FindThreshold(s, k, array_q, len_q, array_m,
+						array_m_len, i, k - j + 1, thresholds, binary);
 			}
 		}
+		/*	update all values in thresholds with calculated threshold values for length i
+		 * stored in copy */
 		for (auto iterator = thresholds.begin(); iterator != thresholds.end();
 				iterator++) {
 
-			int* copyValue = copy.find(iterator->first)->second;
-			int* thresholdValue = iterator->second;
-			for (int j = 1, jLen = thresholdValue[0] + 1; j < jLen; j++) {
-				thresholdValue[j] = copyValue[j];
+			int* copy_value = copy.find(iterator->first)->second;
+			int* threshold_value = iterator->second;
+			for (int j = 1, j_len = threshold_value[0] + 1; j < j_len; j++) {
+				threshold_value[j] = copy_value[j];
 			}
 		}
 	}
 
 	int result = MAX_INT;
 
+	/*	iterate over positions in thresholds that represent k values and choose
+	 * minimum as resulted threshold */
 	for (auto iterator = thresholds.begin(); iterator != thresholds.end();
 			iterator++) {
 
-		int* thresholdValue = iterator->second;
-		for (int j = 1, jLen = thresholdValue[0] + 1; j < jLen; j++) {
-			if (result > thresholdValue[j]) {
-				result = thresholdValue[j];
+		int* threshold_value = iterator->second;
+		for (int j = 1, j_len = threshold_value[0] + 1; j < j_len; j++) {
+			if (result > threshold_value[j]) {
+				result = threshold_value[j];
 			}
 		}
 	}
-	free(arrayM);
+	free(array_m);
 	delete[] binary;
 	return result;
 }
-/*	check constraints */
-int findThreshold(int s, int k, int* Q, int lenQ, int* M, int lenM, int i,
-		int j, unordered_map<string, int*>& tresholds, bool* binaryM) {
 
-	if (!(j >= 0 && j <= k)) {	// check if j is out of bound
+/**
+ * Finds threshold for specified s, k, Q, i, j and M by
+ * using calculated thresholds for lower string length.
+ *
+ * @param s span of shape arrayQ.
+ * @param k number of differences.
+ * @param arrayQ specified shape.
+ * @param lenQ length of shape.
+ * @param arrayM matches at last s-1 position.
+ * @param lenM length of arrayM.
+ * @param i current string length.
+ * @param j current number of differences.
+ * @param thresholds current threshold values for all error values below or
+ * 			equal to k, for all possible sets M describing the matches
+ * 			in the last s-1 positions and for i<=m where i is current
+ * 			string length.
+ * @param binary array for converting values.
+ * @return found threshold.
+ */
+int FindThreshold(int s, int k, int* array_q, int len_q, int* array_m,
+		int len_m, int i, int j, unordered_map<string, int*>& thresholds,
+		bool* binary) {
+
+	if (!(j >= 0 && j <= k)) {
 		return MAX_INT;
 	}
-	for (int c = 0; c < lenM; c++) {
-		if (!(M[c] >= 1 && M[c] <= (s - 1))) {	// check if M is out of bound
+
+	/*	check if all values in M are in range [1, s-1] */
+	for (int c = 0; c < len_m; c++) {
+		if (!(array_m[c] >= 1 && array_m[c] <= (s - 1))) {
 			return MAX_INT;
 		}
 	}
 
-	if (lenM < (s - 1 - j)) {	// check if lenM is out of bound
+	if (len_m < (s - 1 - j)) {
 		return MAX_INT;
 	}
 
 	/*	generate next Ms */
-	int* nextM1 = new int[lenM + 1];
-	int* nextM2 = new int[lenM];
-	int lenNextM1 = 1;
-	int lenNextM2 = 0;
-	nextM1[0] = 1;
-	for (int c = 0; c < lenM; c++) {
-		if (M[c] == (s - 1))
+	int* next_m_first = new int[len_m + 1];
+	int* next_m_second = new int[len_m];
+	int len_next_m_first = 1;
+	int len_next_m_second = 0;
+	next_m_first[0] = 1;
+	for (int c = 0; c < len_m; c++) {
+		if (array_m[c] == (s - 1))
 			continue;
-		nextM1[c + 1] = M[c] + 1;
-		lenNextM1++;
-		nextM2[c] = M[c] + 1;
-		lenNextM2++;
+		next_m_first[c + 1] = array_m[c] + 1;
+		len_next_m_first++;
+		next_m_second[c] = array_m[c] + 1;
+		len_next_m_second++;
 	}
 
-	/*	determine if Q is subset of Mu{0} */
-	bool isSubset = true;
-	for (int c = 0; c < lenQ; c++) {
-		if (Q[c] == 0)
+	/*	determine if arrayQ is subset of M U {0} */
+	bool is_subset = true;
+	for (int c = 0; c < len_q; c++) {
+		if (array_q[c] == 0)
 			continue;
 		bool found = false;
-		for (int d = 0; d < lenM; d++) {
-			if (Q[c] == M[d]) {
+		for (int d = 0; d < len_m; d++) {
+			if (array_q[c] == array_m[d]) {
 				found = true;
 				break;
 			}
 		}
 		if (!found) {
-			isSubset = false;
+			is_subset = false;
 			break;
 		}
 	}
 
-	/*	calculate nextJ (j or j-1) */
-	int nextJ = j;
+	/*	calculate nextJ:
+	 *  j	- if there is match at position i, i.e. M contains s-1
+	 *  j-1	- otherwise*/
+	int next_j = j;
 	bool contains = false;
-	for (int c = 0; c < lenM; c++) {
-		if (M[c] == (s - 1)) {
+	for (int c = 0; c < len_m; c++) {
+		if (array_m[c] == (s - 1)) {
 			contains = true;
 			break;
 		}
 	}
 	if (!contains)
-		nextJ--;
+		next_j--;
 
 	int val = min(
-			getTresholdFor(s, k, nextJ, nextM1, lenNextM1, tresholds, binaryM)
-					+ (isSubset ? 1 : 0),
-			getTresholdFor(s, k, nextJ, nextM2, lenNextM2, tresholds, binaryM));
-	free(nextM1);
-	free(nextM2);
+			GetThresholdFor(s, k, next_j, next_m_first, len_next_m_first,
+					thresholds, binary) + (is_subset ? 1 : 0),
+			GetThresholdFor(s, k, next_j, next_m_second, len_next_m_second,
+					thresholds, binary));
+	free(next_m_first);
+	free(next_m_second);
 	return val;
 }
 
-int getTresholdFor(int s, int k, int j, int* M, int lenM,
-		unordered_map<string, int*>& tresholds, bool* mBinary) {
+/**
+ * Retrieves threshold from currently stored threshold values
+ * for given number of differences j and given set of matches
+ * at last s-1 positions M.
+ *
+ * @param s span of shape.
+ * @param k number of differences.
+ * @param j current number of differences.
+ * @param arrayM matches at last s - 1 position.
+ * @param lenM length of arrayM.
+ * @param thresholds current threshold values for all error values below or
+ * 			equal to k, for all possible sets M describing the matches
+ * 			in the last s-1 positions and for i<=m where i is current
+ * 			string length.
+ * @param binary array for converting values.
+ * @return threshold for specified j and M.
+ */
+int GetThresholdFor(int s, int k, int j, int* array_m, int len_m,
+		unordered_map<string, int*>& thresholds, bool* binary) {
 
-	if (!(j >= 0 && j <= k)) {	// check if j is out of bound
+	/*	check if j is out of bound */
+	if (!(j >= 0 && j <= k)) {
 		return MAX_INT;
 	}
-	for (int c = 0; c < lenM; c++) {
-		if (!(M[c] >= 1 && M[c] <= (s - 1))) {	// check if M is out of bound
+
+	/*	check if all values in M are in range [1, s-1] */
+	for (int c = 0; c < len_m; c++) {
+		if (!(array_m[c] >= 1 && array_m[c] <= (s - 1))) {
 			return MAX_INT;
 		}
 	}
 
-	if (lenM < (s - 1 - j)) {	// check if lenM is out of bound
+	/*	check if len_m is out of bound */
+	if (len_m < (s - 1 - j)) {
 		return MAX_INT;
 	}
 
-	toBinary(M, lenM, mBinary, s - 1);
-	int indexJ = k - j + 1;
-	string str = binaryToString(mBinary, s - 1);
-	int val = tresholds.find(str)->second[indexJ];
+	ToBinary(array_m, len_m, binary, s - 1);
+	int index_j = k - j + 1;
+	string key = BinaryToString(binary, s - 1);
+	int val = thresholds.find(key)->second[index_j];
 	return val;
 }
 
-/*
- Generate list of shapes...
+/**
+ * Generates all possible shapes for specified s and q.
+ *
+ * @param s span of shape.
+ * @param q size of shape.
+ * @return generated shapes.
  */
-vector<int*> generateShapes(int s, int q) {
+vector<int*> GenerateShapes(int s, int q) {
 	int start = 1;
 	int end = s - 2;
 	int len = end - start + 1;
-	long long int countTo = pow(2, len);
+	long long int count_to = pow(2, len);
 	vector<int*> shapes;
 	bool* array = new bool[len];
-	for (long long int counter = 0; counter < countTo; counter++) {
-		int onesCount = toBinary(counter, array, len);
-		if (onesCount == (q - 2)) {
-			int* arrayQ = new int[q];
-			fillFromBinary(array, start, end, arrayQ, 1);
-			arrayQ[0] = 0;
-			arrayQ[q - 1] = s - 1;
-			shapes.push_back(arrayQ);
+	for (long long int counter = 0; counter < count_to; counter++) {
+		int ones_count = ToBinary(counter, array, len);
+		if (ones_count == (q - 2)) {
+			int* array_q = new int[q];
+			FillFromBinary(array, start, end, array_q, 1);
+			array_q[0] = 0;
+			array_q[q - 1] = s - 1;
+			shapes.push_back(array_q);
 		}
 	}
 	return shapes;
 }
 
-bool AreShapesEqual(int* a, int* b, int start, int end) {
+/**
+ * Checks whether two shapes are equal at defined positions.
+ *
+ * @param shape1 First shape.
+ * @param shape2 Second shape.
+ * @return true if shapes are equal at defined positions,
+ * 		false otherwise.
+ */
+bool ShapesEqual(int* first_shape, int* second_shape, int start, int end) {
 	for (int i = start; i < end; i++) {
-		if (a[i] != b[i]) {
+		if (first_shape[i] != second_shape[i]) {
 			return false;
 		}
 	}
 	return true;
 }
 
-vector<int*> nextShapes(int s, int q, int k, int m, unordered_map<string, int*>& tresholdsMap,
+/**
+ * Generates (q,s)-shapes from (q-1,s)-shapes considering only those that gave
+ * positive thresholds.
+ *
+ * @param s span of shape Q.
+ * @param q size of shape Q.
+ * @param k number of differences.
+ * @param m string length.
+ * @param thresholds current threshold values for all error values below or
+ * 			equal to k, for all possible sets M describing the matches
+ * 			in the last s-1 positions and for i<=m where i is current
+ * 			string length.
+ * @param copy copies of current threshold values.
+ * @return generated shapes.
+ */
+vector<int*> GenerateShapesFromPrevious(int s, int q, int k, int m,
+		unordered_map<string, int*>& thresholds,
 		unordered_map<string, int*>& copy) {
 
 	if (q < 4) {
-		return generateShapes(s, q);
+		return GenerateShapes(s, q);
 	}
 
-	vector<int*> shapesQS = nextShapes(s, q - 1, k, m, tresholdsMap, copy);
-	vector<int*> shapePositive;
+	vector<int*> previous_shapes = GenerateShapesFromPrevious(s, q - 1, k, m,
+			thresholds, copy);
 
-	for (unsigned int i = 0; i < shapesQS.size(); i++) {
-		for (auto iterator = tresholdsMap.begin();
-				iterator != tresholdsMap.end(); iterator++) {
-			int* copyValue = copy.find(iterator->first)->second;
-			int* thresholdValue = iterator->second;
-			for (int j = 1, jLen = thresholdValue[0] + 1; j < jLen; j++) {
+	/*	Extract shapes that gave positive threshold. */
+
+	vector<int*> positive_threshold_shapes;
+	for (unsigned int i = 0, len_prev_shapes = previous_shapes.size();
+			i < len_prev_shapes; i++) {
+		for (auto iterator = thresholds.begin(); iterator != thresholds.end();
+				iterator++) {
+			int* copy_value = copy.find(iterator->first)->second;
+			int* threshold_value = iterator->second;
+			for (int j = 1, j_len = threshold_value[0] + 1; j < j_len; j++) {
 				iterator->second[j] = 0;
-				copyValue[j] = 0;
+				copy_value[j] = 0;
 			}
 		}
-		if (myCalculateThresholdForShape(s, k, m, shapesQS[i], q - 1,
-				tresholdsMap, copy) > 0) {
-			shapePositive.push_back(shapesQS[i]);
-		}
-	}
-	vector<vector<int*>> shapeSets;
 
-	while (shapePositive.size() > 0) {
-		vector<int> indexes;
-		vector<int*> tempSet;
-		tempSet.push_back(shapePositive[0]);
-		indexes.push_back(0);
-		for (unsigned int j = shapePositive.size() - 1; j > 0; j--) {
-			if ((shapePositive[0][q - 3] != shapePositive[j][q - 3])
-					&& AreShapesEqual(shapePositive[0], shapePositive[j], 1,
-							q - 3)) {
-				tempSet.push_back(shapePositive[j]);
-				shapePositive.erase(shapePositive.begin() + j);
+		if (CalculateThresholdForShape(s, k, m, previous_shapes[i], q - 1,
+				thresholds, copy) > 0) {
+			positive_threshold_shapes.push_back(previous_shapes[i]);
+		}
+	}
+
+	/*	Construct groups of shapes that only differ in second to last
+	 * position. */
+
+	vector<vector<int*>> shape_groups;
+
+	while (positive_threshold_shapes.size() > 0) {
+		vector<int*> temp_group;
+		temp_group.push_back(positive_threshold_shapes[0]);
+		for (unsigned int j = positive_threshold_shapes.size() - 1; j > 0;
+				j--) {
+			if ((positive_threshold_shapes[0][q - 3]
+					!= positive_threshold_shapes[j][q - 3])
+					&& ShapesEqual(positive_threshold_shapes[0],
+							positive_threshold_shapes[j], 1, q - 3)) {
+				temp_group.push_back(positive_threshold_shapes[j]);
+				positive_threshold_shapes.erase(
+						positive_threshold_shapes.begin() + j);
 			}
 		}
-		shapePositive.erase(shapePositive.begin());
-		shapeSets.push_back(tempSet);
+		positive_threshold_shapes.erase(positive_threshold_shapes.begin());
+		shape_groups.push_back(temp_group);
 	}
+
+	/*	From each group of (q-1,s)-shapes we generate new shape for all pairs in group by making union
+	 * of two paired shapes. That will result in new (q,s)-shape since each pair in group only
+	 * differs in one position thus adding one new element to union. */
 
 	vector<int*> result;
 
-	for (unsigned int i = 0, lenGroups = shapeSets.size(); i < lenGroups; i++) {
+	for (unsigned int i = 0, len_groups = shape_groups.size(); i < len_groups;
+			i++) {
+		for (unsigned int j = 0, len_shape = shape_groups[i].size();
+				j < len_shape; j++) {
 
-		for (unsigned int j = 0, lenShape = shapeSets[i].size(); j < lenShape;
-				j++) {
+			int* base_shape = shape_groups[i][j];
+			for (unsigned int k = j + 1, len_shape_groups =
+					shape_groups[i].size(); k < len_shape_groups; k++) {
 
-			int* baseShape = shapeSets[i][j];
-			for (unsigned int k = j + 1; k < shapeSets[i].size(); k++) {
 				int* temp = new int[s + 1];
-				for (int e = 0; e < q - 3; e++) {
-					temp[e] = baseShape[e];
+				for (int e = 0, len = q - 3; e < len; e++) {
+					temp[e] = base_shape[e];
 				}
-				if (baseShape[q - 3] > shapeSets[i][k][q - 3]) {
-					temp[q - 3] = shapeSets[i][k][q - 3];
-					temp[q - 2] = baseShape[q - 3];
+				if (base_shape[q - 3] > shape_groups[i][k][q - 3]) {
+					temp[q - 3] = shape_groups[i][k][q - 3];
+					temp[q - 2] = base_shape[q - 3];
 				} else {
-					temp[q - 3] = baseShape[q - 3];
-					temp[q - 2] = shapeSets[i][k][q - 3];
+					temp[q - 3] = base_shape[q - 3];
+					temp[q - 2] = shape_groups[i][k][q - 3];
 				}
-				temp[q - 1] = baseShape[q - 2];
+				temp[q - 1] = base_shape[q - 2];
 				result.push_back(temp);
 			}
 		}
@@ -437,28 +566,36 @@ vector<int*> nextShapes(int s, int q, int k, int m, unordered_map<string, int*>&
 	return result;
 }
 
-/*
- Fill arrayM array with numbers from start to end where is one in binary.
- Like there is an array of [start, start + 1, ..., end - 1, end] and in arrayM
- are copied values on indexes where is one in binary array.
- start and end are both inclusive
+/**
+ * Fills arrayM with numbers from start to end shifted by index of binary value.
+ * Only ones in binary are considered, positions with zero value are skipped.
+ * That corresponds to having an array of [start, start + 1, ..., end] and only
+ * copy those values from array at positions where is one in binary.
+ * Start and end are both inclusive.
+ *
+ * @param binary value.
+ * @start first value to be set in arrayM.
+ * @return length of constructed arrayM.
  */
-int fillFromBinary(bool* binary, int start, int end, int* arrayM, int offset) {
+int FillFromBinary(bool* binary, int start, int end, int* array_m, int offset) {
 	int len = end - start + 1;
-	int arrayMLen = offset;
+	int len_m = offset;
 	for (int c = 0; c < len; c++) {
 		if (binary[c] == 1) {
-			arrayM[arrayMLen++] = start + c;
+			array_m[len_m++] = start + c;
 		}
 	}
-	return arrayMLen;
+	return len_m;
 }
 
-/*
- Converts long number to binary array.
- Returns number of ones in array.
+/**
+ * Converts long number to binary array.
+ *
+ * @param value number to convert.
+ * @param array binary array to be filled with corresponding binary values.
+ * @return number of ones in array.
  */
-int toBinary(long long int value, bool* array, int size) {
+int ToBinary(long long int value, bool* array, int size) {
 	int counter = 0;
 	for (int i = 0; i < size; i++) {
 		counter += array[size - i - 1] = value & (1 << i);
@@ -466,7 +603,14 @@ int toBinary(long long int value, bool* array, int size) {
 	return counter;
 }
 
-string binaryToString(bool* binary, int size) {
+/**
+ * Converts binary to string representation of zero and ones.
+ *
+ * @param binary array from which string is created.
+ * @param size size of binary array.
+ * @return string representation of specified binary.
+ */
+string BinaryToString(bool* binary, int size) {
 	string str;
 	str.reserve(size);
 	for (int i = 0; i < size; i++) {
@@ -475,68 +619,89 @@ string binaryToString(bool* binary, int size) {
 	return str;
 }
 
-bool* stringToBinary(string str, bool* binary, int size) {
-	for (unsigned int i = 0; i < str.length(); i++) {
+/**
+ * Converts string to binary array. String is expected to be filled
+ * with zeros and ones.
+ *
+ * @param str String to be converted to binary.
+ * @param binary array to be filled with binary values.
+ */
+void StringToBinary(string str, bool* binary, int size) {
+	for (int i = 0; i < size; i++) {
 		if (str[i] == '1') {
 			binary[i] = true;
 		} else {
 			binary[i] = false;
 		}
 	}
-
-	return binary;
 }
 
-long long int fromBinary(bool* array, int count) {
+/**
+ * Converts binary to decade number.
+ *
+ * @param binary array representing binary values.
+ * @param size size of binary.
+ * @return decade value of binary.
+ */
+long long int ToDecade(bool* binary, int size) {
 	long long int ret = 0;
 	int tmp;
-	for (int i = 0; i < count; i++) {
-		tmp = array[i];
-		ret |= tmp << (count - i - 1);
+	for (int i = 0; i < size; i++) {
+		tmp = binary[i];
+		ret |= tmp << (size - i - 1);
 	}
 	return ret;
 }
 
-void toBinary(int* M, int lenM, bool* binary, int size) {
+/**
+ * Creates binary array from set M with integer values. Values in binary are set
+ * at positions defined in M decreased by 1 since minimal value defined in M is 1.
+ *
+ * @param arrayM matches at last s - 1 position.
+ * @param lenM length of arrayM.
+ * @param binary array to be filled.
+ * @param size size of binary.
+ *
+ */
+void ToBinary(int* array_m, int len_m, bool* binary, int size) {
 	for (int i = 0; i < size; i++) {
 		binary[i] = false;
 	}
-	for (int i = 0; i < lenM; i++) {
-		binary[M[i] - 1] = true;
+	for (int i = 0; i < len_m; i++) {
+		binary[array_m[i] - 1] = true;
 	}
 }
 
-long long int binomialCoefficient(int m, int n) {
-	long long int result = 1;
-	for (int i = m; i > m - n; i--) {
-		result *= i;
+/**
+ * Converts shape to string representation.
+ *
+ * @param shape to convert.
+ * @param q length of shape.
+ * @return string representation of shape.
+ */
+string ShapeToString(int* shape, int q) {
+	string str = "#";
+	int index = 1;
+	for (int counter = 1, len = shape[q - 1]; counter <= len; counter++) {
+		if (shape[index] == counter) {
+			str += "#";
+			index++;
+		} else {
+			str += "-";
+		}
 	}
-	for (int i = 2; i <= n; i++) {
-		result /= i;
-	}
-	return result;
+	return str;
 }
 
-/*	======================== TESTS ========================= */
-
-int testThresholdOneShape1() {
-	// shape is #-##
-	int* Q = new int[3] { 0, 2, 3 };
-	int s = 4;
-	int k = 3;
-	int m = 11;
-	return calculateThresholdForShape(s, k, m, Q, 3);
-}
-
-int testThresholdOneShape2() {
-	int* Q = new int[3] { 0, 1, 3 };
-	int s = 4;
-	int k = 3;
-	int m = 13;
-	return calculateThresholdForShape(s, k, m, Q, 3);
-}
-
-int* arrayForQ(int q, int k) {
+/**
+ * Retrieves expected threshold for string of length 50 and specified k and q
+ * and all possible span values.
+ *
+ * @param q length of shape.
+ * @param k number of differences.
+ * @return threshold values.
+ */
+int* ArrayForQ(int q, int k) {
 	if (k == 5) {
 		if (q == 2) {
 			return new int[45] { 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28,
@@ -635,11 +800,18 @@ int* arrayForQ(int q, int k) {
 	return new int[45];
 }
 
-void testThresholdForAllShapesWithSomeQAndKVariableS(int q, int k) {
+/**
+ * Calculates threshold for string of length 50 and specified k and q
+ * by varying all possible span values.
+ *
+ * @param q length of shape.
+ * @param k number of differences.
+ */
+void CalculateThresholdForSpanValues(int q, int k) {
 	int* result = new int[1];
-	int* array = arrayForQ(q, k);
-	for (int s = 20; s <= (50 - k); s++) {
-		int value = calculateThreshold(s, k, 50, q, result, false);
+	int* array = ArrayForQ(q, k);
+	for (int s = q, len = 50 - k; s <= len; s++) {
+		int value = CalculateThreshold(s, k, 50, q, &result);
 		bool sat = array[s - q] == value;
 		cout << "s: " << s << " threshold: " << value << " satisfied: " << sat
 				<< endl;
