@@ -26,15 +26,25 @@ output:
 
 Run with 2 arguments: `run.sh k q`
 ```
-command: run.sh 4 2
+command: run.sh 4 5
 output: 
-s: 2 threshold: 41 satisfied: 1
-s: 3 threshold: 40 satisfied: 1
-s: 4 threshold: 39 satisfied: 1
-s: 5 threshold: 38 satisfied: 1
-s: 6 threshold: 37 satisfied: 1
-s: 7 threshold: 36 satisfied: 1
-s: 8 threshold: 35 satisfied: 1
+s: 5 threshold: 26 satisfied: 1 for shape: #####
+s: 6 threshold: 25 satisfied: 1 for shape: #-####
+s: 7 threshold: 24 satisfied: 1 for shape: #--####
+s: 8 threshold: 23 satisfied: 1 for shape: #---####
+s: 9 threshold: 22 satisfied: 1 for shape: #----####
+s: 10 threshold: 21 satisfied: 1 for shape: #-----####
+s: 11 threshold: 20 satisfied: 1 for shape: #------####
+s: 12 threshold: 20 satisfied: 1 for shape: #--##----#-#
+s: 13 threshold: 19 satisfied: 1 for shape: #----##-#---#
+s: 14 threshold: 18 satisfied: 1 for shape: #------#-#--##
+s: 15 threshold: 17 satisfied: 1 for shape: #--------#--###
+s: 16 threshold: 16 satisfied: 1 for shape: #--------#--##-#
+s: 17 threshold: 16 satisfied: 1 for shape: #-----#-----#-#-#
+s: 18 threshold: 15 satisfied: 1 for shape: #-------#-##-----#
+s: 19 threshold: 14 satisfied: 1 for shape: #-----------#-#--##
+s: 20 threshold: 13 satisfied: 1 for shape: #-------------#--###
+s: 21 threshold: 12 satisfied: 1 for shape: #---------------#-###
 ... 
 ```
 
