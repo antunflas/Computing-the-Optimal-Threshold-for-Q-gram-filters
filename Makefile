@@ -1,5 +1,5 @@
 all:
-	g++ main.cpp -std=c++0x -o main.out
+	@ g++ main.cpp -std=c++0x -o main.out
 
 clean:
 	@ rm main.out
