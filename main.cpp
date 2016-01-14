@@ -121,7 +121,9 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 		}
 
 		/*	value for set M is array of all number of differences for which M is
-		 * valid combination of matches at last s-1 position*/
+		 *	valid combination of matches at last s-1 position.
+		 *	There are k - (s - 1 - ones) + 1 of them.
+		 *	This length is stored on first position at value array. */
 
 		int* array_j = new int[1 + k - (s - 1 - ones) + 1];
 		array_j[0] = k - (s - 1 - ones) + 1;
@@ -139,7 +141,7 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 		thresholds.insert(thresholds_pair);
 	}
 
-	//vector<int*> shapes = nextShapes(s, q, k, m, tresholdsMap, copy);
+	//vector<int*> shapes = GenerateShapesFromPrevious(s, q, k, m, tresholdsMap, copy);
 	vector<int*> shapes = GenerateShapes(s, q);
 
 	int threshold = 0;
@@ -168,6 +170,18 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 	shapes.clear();
 	shapes.swap(empty_vector);
 	delete[] binary;
+	for (auto iterator = thresholds.begin(); iterator != thresholds.end();
+					iterator++) {
+		delete iterator->second;
+		thresholds.erase(iterator);
+	}
+	for (auto iterator = copy.begin(); iterator != copy.end();
+					iterator++) {
+		delete iterator->second;
+		thresholds.erase(iterator);
+	}
+	delete thresholds;
+	delete copy;
 	return threshold;
 }
 
