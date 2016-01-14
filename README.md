@@ -7,7 +7,7 @@ Approximate string matching which compares q-grams (substrings of length q) and 
 Project is created as assignment within the course [Bioinformatics](https://www.fer.unizg.hr/en/course/bio) on Faculty of Electrical Engineering and Computing, University of Zagreb.
 
 ##Installation
-Compile the source files by running `make` or `compile.sh` from root directory of project.
+Compile the source files by running `make` or `compile.sh` from main directory in root directory of project.
 
 ##Usage
 Depending on parameters sent in program different data is shown. If inputs are size of shape Q (q) and distance (k) then optimal threshold is calculated for span (s) varying from q up to 50-k with string length (m) of 50. For this option available distance (k) values are 4 and 5. Alternatively, except for q and k, it is possible to define both s and m. With these 4 parameters their optimal threshold is calculated.
