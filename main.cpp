@@ -180,8 +180,6 @@ int CalculateThreshold(int s, int k, int m, int q, int** result) {
 		delete iterator->second;
 		thresholds.erase(iterator);
 	}
-	delete thresholds;
-	delete copy;
 	return threshold;
 }
 
